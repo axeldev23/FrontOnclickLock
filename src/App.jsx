@@ -1,22 +1,22 @@
-import React from 'react';
-import './assets/styles/App.css';
-import { Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
-import Home from './components/Home';
-import MultiStepForm from './components/MultiStepForm';
-import { AuthProvider } from './components/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import { useState } from 'react'
+import './assets/styles/App.css'
+import Login from './components/Login'
+import { Routes, Route } from 'react-router-dom'
+import Home from './components/Home'
+import MultiStepForm from './components/MultiStepForm'
 
 function App() {
-    return (
-        <AuthProvider>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                <Route path="/registrar-credito" element={<ProtectedRoute><MultiStepForm /></ProtectedRoute>} />
-            </Routes>
-        </AuthProvider>
-    );
+  const [count, setCount] = useState(0)
+
+  return (
+    <>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/registrar-credito" element={<MultiStepForm />} />
+      </Routes>
+    </>
+  )
 }
 
-export default App;
+export default App
