@@ -1,11 +1,11 @@
 import React from 'react';
-import Layout from './Layout';
 
-function FormEquipo({ nextStep, handleChange, values, prevStep }) {
+function FormEquipo({ nextStep, handleChange, values, prevStep, setMontoCredito }) {
 
     function handleNext() {
         const form = document.getElementById("formEquipo");
         if (form.checkValidity()) {
+            setMontoCredito(values.equipo_precio); // Establecer el valor de monto_credito basado en equipo_precio
             nextStep();
         } else {
             form.reportValidity(); // Muestra mensajes de error nativos del navegador
@@ -13,10 +13,10 @@ function FormEquipo({ nextStep, handleChange, values, prevStep }) {
     }
 
     return (
-        <Layout>
-            <form id='formEquipo' onSubmit={(e) => e.preventDefault()}>
+        <div className='flex justify-center w-full px-4 md:px-8 lg:px-16'>
+            <form id='formEquipo' className='dark:shadow-custom shadow-2xl mt-5 mb-12 max-w-xl rounded-xl p-5 px-12 w-full max-w-4xl' onSubmit={(e) => e.preventDefault()}>
                 <div className="space-y-10">
-                    <h1 className="text-xl w-96 font-semibold">Registro del Equipo</h1>
+                    <h1 className="text-xl w-full md:w-96 text-left mt-4 font-semibold">Registro del Equipo</h1>
 
                     <div className="text-left">
                         <label htmlFor="equipo_a_adquirir" className="block text-sm font-medium leading-6 text-gray-900 dark:text-white">
@@ -50,6 +50,10 @@ function FormEquipo({ nextStep, handleChange, values, prevStep }) {
                                 autoComplete="given-name"
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 required
+                                pattern="^\d{15}$"
+                                minLength="15"
+                                maxLength="15"
+                                title="El IMEI debe contener exactamente 15 dígitos."
                             />
                         </div>
                     </div>
@@ -81,7 +85,7 @@ function FormEquipo({ nextStep, handleChange, values, prevStep }) {
                     </div>
                 </div>
             </form>
-        </Layout>
+        </div>
     );
 }
 

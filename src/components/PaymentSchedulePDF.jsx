@@ -3,15 +3,17 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { fetchPrestamo } from '../api/api'; // Asegúrate de ajustar la ruta del import
 import { format, addWeeks } from 'date-fns'; // Asegúrate de tener date-fns instalado
+import { Button } from "@material-tailwind/react";
 
 const PaymentSchedulePDF = ({ prestamoId }) => {
     const generatePDF = async () => {
         try {
             const prestamo = await fetchPrestamo(prestamoId);
             const { monto_credito, interes, plazo_credito, equipo_a_adquirir, fecha_inicio } = prestamo;
-            const interesSemanal = (monto_credito * (interes / 100)) / 52;
-            const totalInteres = interesSemanal * plazo_credito;
-            const totalPagar = parseFloat(monto_credito) + totalInteres;
+
+            // Calculo del interés simple
+            const interesSimple = monto_credito * (interes / 100);
+            const totalPagar = parseFloat(monto_credito) + interesSimple;
             const montoSemanal = totalPagar / plazo_credito;
 
             const doc = new jsPDF();
@@ -45,9 +47,13 @@ const PaymentSchedulePDF = ({ prestamoId }) => {
     };
 
     return (
-        <button onClick={generatePDF} className="bg-green-500 hover:bg-green-600 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-green-300 hover:border-green-500 text-white rounded transition ease-in duration-300">
-            Descargar Formato de Pagos
-        </button>
+        <Button onClick={generatePDF} className="flex items-center gap-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+
+            Tabla de Amortización
+        </Button>
     );
 };
 

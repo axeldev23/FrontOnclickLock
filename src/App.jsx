@@ -1,22 +1,43 @@
-import { useState } from 'react'
-import './assets/styles/App.css'
-import Login from './components/Login'
-import { Routes, Route } from 'react-router-dom'
-import Home from './components/Home'
-import MultiStepForm from './components/MultiStepForm'
+import './assets/styles/App.css';
+import Login from './components/Login';
+import AdminstrarCreditos from './components/AdministrarCreditos';
+import MultiStepForm from './components/MultiStepForm';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, AuthContext } from './components/context/AuthContext';
+import { useContext } from 'react';
+import Layout from './components/Layout';
+
+
+
+const PrivateRoute = ({ element }) => {
+  const { user, token } = useContext(AuthContext);
+
+  return user && token ? element : <Navigate to="/login" />;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
+    <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/registrar-credito" element={<MultiStepForm />} />
+
+
+        <Route element={<Layout />}>
+        <Route path="/" element={<PrivateRoute element={<MultiStepForm />} />} />
+        <Route path="/administrar-creditos" element={<PrivateRoute element={<AdminstrarCreditos />} />} />
+        </Route>
+
+
+
+
+
+
+
+
+
       </Routes>
-    </>
-  )
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

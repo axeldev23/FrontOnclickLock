@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FormCliente from './FormCliente';
 import FormEquipo from './FormEquipo';
 import FormCredito from './FormCredito';
+import Cotizacion from './Cotizacion';
 import { createCliente, createPrestamo } from '../api/api';
 import { toast } from 'react-toastify';
 import Modal from 'react-modal';
-import PaymentSchedulePDF from './PaymentSchedulePDF'; // Asegúrate de ajustar la ruta según corresponda
+import PaymentSchedulePDF from './PaymentSchedulePDF';
 import { FaCheckCircle } from "react-icons/fa";
-
+import ContratoCreditoPDF from './ContratoCredito';
 
 Modal.setAppElement('#root');
 
@@ -15,7 +16,8 @@ function MultiStepForm() {
   const [step, setStep] = useState(1);
   const [isNewClient, setIsNewClient] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [prestamoId, setPrestamoId] = useState(null); // Para almacenar el ID del préstamo creado
+  const [prestamoId, setPrestamoId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     cliente_id: '',
@@ -26,7 +28,7 @@ function MultiStepForm() {
       correo_electronico: '',
       numero_telefono: '',
       foto_identificacion: null
-    },
+    }, 
     equipo: {
       equipo_a_adquirir: '',
       equipo_precio: '',
@@ -40,6 +42,18 @@ function MultiStepForm() {
     }
   });
 
+  useEffect(() => {
+    // Actualiza monto_credito basado en equipo_precio y pago_inicial
+    const updatedMontoCredito = formData.equipo.equipo_precio - (formData.credito.pago_inicial || 0);
+    setFormData(prevState => ({
+      ...prevState,
+      credito: {
+        ...prevState.credito,
+        monto_credito: updatedMontoCredito
+      }
+    }));
+  }, [formData.equipo.equipo_precio, formData.credito.pago_inicial]);
+
   const nextStep = () => {
     if (step === 2 && parseFloat(formData.credito.monto_credito) > parseFloat(formData.equipo.equipo_precio)) {
       toast.error("El monto del crédito no puede ser superior al precio del equipo.");
@@ -49,6 +63,15 @@ function MultiStepForm() {
   };
 
   const prevStep = () => {
+    if (step === 4) {
+      setFormData(prevState => ({
+        ...prevState,
+        credito: {
+          ...prevState.credito,
+          pago_inicial: '',
+        }
+      }));
+    }
     setStep(step - 1);
   };
 
@@ -74,10 +97,16 @@ function MultiStepForm() {
     }));
   };
 
+  const handleShowCotizacion = () => {
+    setStep(4);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsLoading(true);  // Mostrar el loading
     if (parseFloat(formData.credito.monto_credito) > parseFloat(formData.equipo.equipo_precio)) {
       toast.error("El monto del crédito no puede ser superior al precio del equipo.");
+      setIsLoading(false);  // Ocultar el loading
       return;
     }
     console.log('Datos del formulario:', formData);
@@ -104,9 +133,11 @@ function MultiStepForm() {
       // Guardar el ID del préstamo y mostrar el modal de éxito
       setPrestamoId(prestamoResponse.id);
       setIsModalOpen(true);
+      setIsLoading(false);  // Ocultar el loading
 
     } catch (error) {
       console.error('Error creando préstamo:', error);
+      setIsLoading(false);  // Ocultar el loading
     }
   };
 
@@ -157,46 +188,56 @@ function MultiStepForm() {
           prevStep={prevStep}
           handleChange={handleChange('equipo')}
           values={formData.equipo}
+          setMontoCredito={(value) => setFormData(prevState => ({
+            ...prevState,
+            credito: {
+              ...prevState.credito,
+              monto_credito: value
+            }
+          }))}
         />
       )}
       {step === 3 && (
         <FormCredito
-          handleSubmit={handleSubmit}
+          handleShowCotizacion={handleShowCotizacion}
           prevStep={prevStep}
           handleChange={handleChange('credito')}
           values={formData.credito}
+          equipoPrecio={formData.equipo.equipo_precio}
+        />
+      )}
+      {step === 4 && (
+        <Cotizacion
+          values={formData.credito}
+          prevStep={prevStep}
+          handleSubmit={handleSubmit}
+          isLoading={isLoading}  // Pasar el estado de carga
         />
       )}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={handleModalClose}
         contentLabel="Éxito"
-        className="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50"
-        overlayClassName="fixed inset-0 bg-gray-900 bg-opacity-50"
+        className="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 "
+        overlayClassName="fixed inset-0 bg-gray-900 bg-opacity-50 z-50"
       >
         <div className="bg-gray-800 border border-gray-800 shadow-lg rounded-2xl p-6 max-w-md w-full text-center">
           <div className="text-center p-3 flex-auto justify-center">
             <div className="flex items-center justify-center w-16 h-16 mx-auto bg-green-100 rounded-full p-1">
-            <FaCheckCircle  className="text-green-500 text-6xl" />
-
+              <FaCheckCircle className="text-green-500 text-6xl" />
             </div>
-
-
             <h2 className="text-xl font-bold py-4 text-gray-200">¡Registro exitoso!</h2>
             <p className="text-sm text-gray-200 px-2">
               ¿Desea descargar el formato de pagos y el formato de compra?
             </p>
           </div>
-          <div className="p-2 mt-2 text-center space-y-1 md:block">
-           
+          <div className="p-2 mt-2 text-center space-y-1 md:block  ">
+            <div className='flex flex-col items-center justify-center gap-3'>
             <PaymentSchedulePDF prestamoId={prestamoId} />
-            <button
-              onClick={() => { /* lógica para descargar el formato de compra */ }}
-              className="bg-blue-500 hover:bg-blue-700 px-5 ml-4 py-2 text-sm shadow-sm hover:shadow-lg font-medium tracking-wider border-2 border-blue-300 hover:border-blue-500 text-white rounded transition ease-in duration-300"
-            >
-              Descargar Formato de Compra
-            </button>
-
+            
+            <ContratoCreditoPDF prestamoId={prestamoId} />
+            </div>
+            
             <br />
             <br />
             <button

@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://gestionprestamos-server.onrender.com/api';
 
 // Clientes
 
@@ -99,19 +99,36 @@ export const createPrestamo = async (prestamo) => {
       throw error;
     }
   };
-export const updatePrestamo = async (id, prestamoData) => {
-  const response = await fetch(`${API_URL}/prestamos/${id}/`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(prestamoData)
-  });
-  if (!response.ok) {
-    throw new Error('Failed to update prestamo');
-  }
-  return await response.json();
-};
+
+  export const updatePrestamo = async (id, prestamoData) => {
+    console.log(`Intentando actualizar prestamo con ID: ${id}`);
+    console.log('Datos del prestamo a actualizar:', prestamoData);
+    
+    try {
+      const response = await fetch(`${API_URL}/prestamos/${id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(prestamoData)
+      });
+  
+      console.log('Respuesta de la actualización:', response);
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error en la actualización:', errorText);
+        throw new Error('Failed to update prestamo');
+      }
+  
+      const data = await response.json();
+      console.log('Datos actualizados del prestamo:', data);
+      return data;
+    } catch (error) {
+      console.error('Error en updatePrestamo:', error);
+      throw error;
+    }
+  };
 
 export const deletePrestamo = async (id) => {
   const response = await fetch(`${API_URL}/prestamos/${id}/`, {
@@ -121,4 +138,47 @@ export const deletePrestamo = async (id) => {
     throw new Error('Failed to delete prestamo');
   }
   return await response.json();
+};
+
+// Login
+export const login = async (username, password) => {
+  try {
+    const response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to login');
+    }
+    const data = await response.json();
+    console.log('Respuesta de login:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en login:', error);
+    throw error;
+  }
+};
+
+// Descargar imagen
+export const downloadImage = async (clienteId) => {
+  try {
+    const response = await fetch(`${API_URL}/download_image/${clienteId}/`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'image.jpg'; // O el nombre de archivo que desees
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (error) {
+    console.error('Error en downloadImage:', error);
+    throw error;
+  }
 };

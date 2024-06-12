@@ -5,10 +5,12 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import Select from 'react-select';
 import { fetchClientes } from '../api/api';
 import { toast } from 'react-toastify';
+import { Input } from "@material-tailwind/react";
 
 function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClient, isNewClient }) {
   const [clientes, setClientes] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const loadClientes = async () => {
@@ -21,6 +23,13 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
     };
 
     loadClientes();
+
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(darkModeMediaQuery.matches);
+
+    const handler = (e) => setIsDarkMode(e.matches);
+    darkModeMediaQuery.addEventListener('change', handler);
+    return () => darkModeMediaQuery.removeEventListener('change', handler);
   }, []);
 
   function handleNext() {
@@ -29,7 +38,7 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
       if (form.checkValidity()) {
         nextStep();
       } else {
-        form.reportValidity(); // Muestra mensajes de error nativos del navegador
+        form.reportValidity();
       }
     } else {
       if (values.cliente_id) {
@@ -44,7 +53,7 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
     setIsNewClient(!isNewClient);
     setFormData(prevState => ({
       ...prevState,
-      cliente_id: '' // Clear selected client
+      cliente_id: ''
     }));
   }
 
@@ -93,10 +102,10 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
   };
 
   return (
-    <Layout>
-      <form id="formCliente" onSubmit={(e) => e.preventDefault()}>
-        <div className="space-y-10">
-          <h1 className="text-xl w-96 font-semibold">Registro del Cliente</h1>
+    <div className='flex justify-center w-full px-4 md:px-8 lg:px-16'>
+      <form id="formCliente" className='dark:shadow-custom shadow-2xl mt-5 mb-12 max-w-xl rounded-xl p-5 px-12 w-full max-w-4xl' onSubmit={(e) => e.preventDefault()}>
+        <div className="space-y-10 ">
+          <h1 className="text-xl w-full md:w-96 text-left mt-4 font-semibold">Registro del Cliente</h1>
           
           <div>
             <label htmlFor="clienteExistente" className="block text-sm font-medium text-left leading-6 text-gray-900 dark:text-white mb-2">
@@ -128,95 +137,80 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
           </div>
 
           <div className="text-left">
-            <label htmlFor="nombre_completo" className="block text-sm font-medium leading-6 text-gray-900 dark:text-white">
-              Nombre completo
-            </label>
-            <div className="mt-2">
-              <input
-                type="text"
-                name="nombre_completo"
-                id="nombre_completo"
-                autoComplete="name"
-                value={values.cliente.nombre_completo || ''}
-                onChange={handleChange}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                required={isNewClient}
-                disabled={!isNewClient}
-              />
-            </div>
+            <Input
+              type="text"
+              label="Nombre completo"
+              name="nombre_completo"
+              id="nombre_completo"
+              autoComplete="name"
+              value={values.cliente.nombre_completo || ''}
+              onChange={handleChange}
+              required={isNewClient}
+              disabled={!isNewClient}
+              color={isDarkMode && isNewClient ? "white" : undefined}
+              className='focus:ring-0'
+            />
           </div>
 
           <div className="text-left mt-8">
-            <label htmlFor="fecha_nacimiento" className="block text-sm font-medium leading-6 text-gray-900 dark:text-white">
-              Fecha de nacimiento
-            </label>
-            <div className="mt-2">
-              <input
-                type="date"
-                name="fecha_nacimiento"
-                id="fecha_nacimiento"
-                value={values.cliente.fecha_nacimiento || ''}
-                onChange={handleChange}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                required={isNewClient}
-                disabled={!isNewClient}
-              />
-            </div>
+            <Input
+              type="date"
+              label="Fecha de nacimiento"
+              name="fecha_nacimiento"
+              id="fecha_nacimiento"
+              value={values.cliente.fecha_nacimiento || ''}
+              onChange={handleChange}
+              required={isNewClient}
+              disabled={!isNewClient}
+              color={isDarkMode && isNewClient ? "white" : undefined}
+              className='focus:ring-0'
+            />
           </div>
 
           <div className="text-left mt-8">
-            <label htmlFor="domicilio_actual" className="block text-sm font-medium leading-6 text-gray-900 dark:text-white">
-              Domicilio actual
-            </label>
-            <div className="mt-2">
-              <input
-                type="text"
-                name="domicilio_actual"
-                id="domicilio_actual"
-                value={values.cliente.domicilio_actual || ''}
-                onChange={handleChange}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                required={isNewClient}
-                disabled={!isNewClient}
-              />
-            </div>
+            <Input
+              type="text"
+              label="Domicilio actual"
+              name="domicilio_actual"
+              id="domicilio_actual"
+              value={values.cliente.domicilio_actual || ''}
+              onChange={handleChange}
+              required={isNewClient}
+              disabled={!isNewClient}
+              color={isDarkMode && isNewClient ? "white" : undefined}
+              className='focus:ring-0'
+            />
           </div>
 
           <div className="text-left mt-8">
-            <label htmlFor="correo_electronico" className="block text-sm font-medium leading-6 text-gray-900 dark:text-white">
-              Correo electrónico
-            </label>
-            <div className="mt-2">
-              <input
-                type="email"
-                name="correo_electronico"
-                id="correo_electronico"
-                value={values.cliente.correo_electronico || ''}
-                onChange={handleChange}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                required={isNewClient}
-                disabled={!isNewClient}
-              />
-            </div>
+            <Input
+              type="email"
+              label="Correo electrónico"
+              name="correo_electronico"
+              id="correo_electronico"
+              value={values.cliente.correo_electronico || ''}
+              onChange={handleChange}
+              required={isNewClient}
+              disabled={!isNewClient}
+              color={isDarkMode && isNewClient ? "white" : undefined}
+              className='focus:ring-0'
+            />
           </div>
 
           <div className="text-left mt-8">
-            <label htmlFor="numero_telefono" className="block text-sm font-medium leading-6 text-gray-900 dark:text-white">
-              Número de teléfono
-            </label>
-            <div className="mt-2">
-              <input
-                type="tel"
-                name="numero_telefono"
-                id="numero_telefono"
-                pattern="[0-9]{10}"
-                value={values.cliente.numero_telefono || ''}
-                onChange={handleChange}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                required={isNewClient}
-                disabled={!isNewClient}
-              />
-            </div>
+            <Input
+              type="tel"
+              label="Número de teléfono"
+              name="numero_telefono"
+              id="numero_telefono"
+              pattern="[0-9]{10}"
+              value={values.cliente.numero_telefono || ''}
+              onChange={handleChange}
+              required={isNewClient}
+              disabled={!isNewClient}
+              color={isDarkMode && isNewClient ? "white" : undefined}
+              className={`focus:ring-0 ${!isNewClient ? 'text-black' : 'text-black'}`}
+            />
           </div>
 
           <div className="col-span-full">
@@ -243,7 +237,7 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
                       htmlFor="foto_identificacion"
                       className={`relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500 ${!isNewClient ? 'cursor-not-allowed bg-gray-400 text-gray-100 hover:text-gray-100' : ''}`}
                     >
-                      <span className='px-1'>Subir foto</span>
+                      <span className={`px-1  ${!isNewClient ? 'disabled-span' : ''}`}>Subir foto</span>
                       <input id="foto_identificacion" name="foto_identificacion" type="file" className="sr-only" onChange={handleFileChange} disabled={!isNewClient} />
                     </label>
                     
@@ -261,7 +255,7 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
           </div>
         </div>
       </form>
-    </Layout>
+    </div>
   );
 }
 
