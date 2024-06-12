@@ -20,21 +20,10 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
-
-
         <Route element={<Layout />}>
         <Route path="/" element={<PrivateRoute element={<MultiStepForm />} />} />
         <Route path="/administrar-creditos" element={<PrivateRoute element={<AdminstrarCreditos />} />} />
         </Route>
-
-
-
-
-
-
-
-
-
       </Routes>
     </AuthProvider>
   );
