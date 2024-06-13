@@ -9,15 +9,25 @@ export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [error, setError] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError(false);
+        setErrorMessage('');
 
         try {
             const data = await loginAPI(username, password);
             login(data.user, data.token);
         } catch (error) {
             console.error('Error en la autenticación', error);
+            setErrorMessage('Credenciales Incorrectas');
+            setError(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -56,9 +66,11 @@ export default function Login() {
                                 label="Nombre de usuario" 
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="mb-4 focus:ring-0 dark:border-slate-200" // Añade clases para foco
+                                className={`mb-4 focus:ring-0 ${isDarkMode && error ? 'text-white' : ''}`}
                                 color={isDarkMode ? "white" : undefined}
                                 size='lg'
+                                error={error}
+                                required
                             />
                         </div>
 
@@ -69,19 +81,27 @@ export default function Login() {
                                     label="Contraseña"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="mb-4 focus:ring-0" // Añade clases para foco
+                                    className={`mb-4 focus:ring-0 ${isDarkMode && error ? 'text-white' : ''}`}
                                     color={isDarkMode ? "white" : undefined}
                                     size='lg'
+                                    error={error}
+                                    required
                                 />
                             </div>
+                            {errorMessage && (
+                                <div className='mt-5'>
+                                    <p id='mensajeError' className='text-red-600'>{errorMessage}</p>
+                                </div>
+                            )}
                         </div>
 
                         <div>
                             <button
                                 type="submit"
                                 className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                disabled={loading}
                             >
-                                Iniciar sesión
+                                {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                             </button>
                         </div>
                     </form>
