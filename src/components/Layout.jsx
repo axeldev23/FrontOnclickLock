@@ -14,19 +14,14 @@ const Layout = ({ children }) => {
 
   // Update selected tab based on current location
   useEffect(() => {
-    switch (location.pathname) {
-      case '/':
-        setSelectedTab(1);
-        break;
-      case '/administrar-creditos':
-        setSelectedTab(2);
-        break;
-      default:
-        setSelectedTab(1);
-        break;
+    if (location.pathname === '/') {
+      setSelectedTab(1);
+    } else if (location.pathname === '/administrar-creditos' || location.pathname.startsWith('/editar-cliente/')) {
+      setSelectedTab(2);
+    } else {
+      setSelectedTab(1);
     }
   }, [location.pathname]);
-
   const handleTabChange = (tabIndex, path) => {
     setSelectedTab(tabIndex);
     navigate(path);

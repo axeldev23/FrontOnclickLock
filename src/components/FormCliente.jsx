@@ -106,7 +106,7 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
       <form id="formCliente" className='dark:shadow-custom shadow-2xl mt-5 mb-12 max-w-xl rounded-xl p-5 px-12 w-full max-w-4xl' onSubmit={(e) => e.preventDefault()}>
         <div className="space-y-10 ">
           <h1 className="text-xl w-full md:w-96 text-left mt-4 font-semibold">Registro del Cliente</h1>
-          
+
           <div>
             <label htmlFor="clienteExistente" className="block text-sm font-medium text-left leading-6 text-gray-900 dark:text-white mb-2">
               Cliente Existente
@@ -152,6 +152,24 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
             />
           </div>
 
+          <div className="text-left mt-8">
+            <Input
+              type="text"
+              label="Clave de Elector"
+              name="clave_elector"
+              id="clave_elector"
+              value={values.cliente.clave_elector || ''}
+              onChange={handleChange}
+              required={isNewClient}
+              disabled={!isNewClient}
+              color={isDarkMode && isNewClient ? "white" : undefined}
+              className='focus:ring-0 uppercase'
+              maxLength={18}
+              pattern=".{18,18}"
+            />
+          </div>
+
+          
           <div className="text-left mt-8">
             <Input
               type="date"
@@ -240,7 +258,7 @@ function FormCliente({ nextStep, handleChange, values, setFormData, setIsNewClie
                       <span className={`px-1  ${!isNewClient ? 'disabled-span' : ''}`}>Subir foto</span>
                       <input id="foto_identificacion" name="foto_identificacion" type="file" className="sr-only" onChange={handleFileChange} disabled={!isNewClient} />
                     </label>
-                    
+
                   </div>
                   <p className="text-xs leading-5 text-gray-600 dark:text-white">PNG, JPG, JPEG hasta 10MB</p>
                 </div>

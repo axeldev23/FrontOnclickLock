@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardHeader,
@@ -33,6 +34,7 @@ const TABS = [
 const ITEMS_PER_PAGE = 10;
 
 const AdministrarCreditos = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [prestamos, setPrestamos] = useState([]);
   const [clientes, setClientes] = useState([]);
@@ -76,6 +78,7 @@ const AdministrarCreditos = () => {
         const cliente = clientes.find((cliente) => cliente.id === prestamo.cliente);
         const clienteNombre = cliente ? cliente.nombre_completo.toLowerCase() : '';
         const clienteTelefono = cliente ? cliente.numero_telefono.toLowerCase() : '';
+        const claveElector = cliente ? cliente.clave_elector.toLowerCase() : '';
         const equipo = prestamo.equipo_a_adquirir.toLowerCase();
         const term = searchTerm.toLowerCase();
         const estadoMatch = prestamo.estado === estadoFilter;
@@ -83,6 +86,7 @@ const AdministrarCreditos = () => {
         return (
           (clienteNombre.includes(term) ||
             clienteTelefono.includes(term) ||
+            claveElector.includes(term) ||
             equipo.includes(term)) &&
           estadoMatch
         );
@@ -120,7 +124,7 @@ const AdministrarCreditos = () => {
   const currentPrestamos = filteredPrestamos.slice(startIndex, endIndex);
   const totalPages = Math.ceil(filteredPrestamos.length / ITEMS_PER_PAGE);
 
-  const TABLE_HEAD = ['Cliente', 'Equipo', 'Monto', 'Estado', 'Acciones'];
+  const TABLE_HEAD = ['Cliente', 'Clave Elector', 'Equipo', 'Monto', 'Estado', 'Acciones'];
 
   return (
     <Card className="h-full w-full shadow-2xl dark:shadow-custom mb-8 dark:bg-dark-secondary dark:border-2 dark:border-dark-border">
@@ -204,6 +208,11 @@ const AdministrarCreditos = () => {
                       </div>
                     </td>
                     <td className={classes}>
+                      <Typography variant="small" color="blue-gray" className="font-normal dark:text-white uppercase">
+                        {cliente ? cliente.clave_elector : 'N/A'}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
                       <Typography variant="small" color="blue-gray" className="font-normal dark:text-white">
                         {prestamo.equipo_a_adquirir}
                       </Typography>
@@ -225,13 +234,25 @@ const AdministrarCreditos = () => {
                     </td>
                     <td className={classes}>
                       <div className="flex gap-2">
+                        <Tooltip content="Editar Cliente">
+                          <Button
+                            onClick={() => navigate(`/editar-cliente/${cliente.id}`)}
+                            className="flex items-center gap-3"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+
+                            Editar
+                          </Button>
+                        </Tooltip>
                         <Tooltip content="Generar Plan de Pagos">
                           <PaymentSchedulePDF prestamoId={prestamo.id} />
                         </Tooltip>
                         <Tooltip content="Generar Formato de compra">
                           <ContratoCreditoPDF prestamoId={prestamo.id} />
                         </Tooltip>
-                        
+
                         {cliente && cliente.foto_identificacion && (
                           <Tooltip content="Descargar Identificación">
                             <Button
@@ -257,6 +278,7 @@ const AdministrarCreditos = () => {
                             <option value="FINALIZADO">Finalizado</option>
                           </select>
                         </Tooltip>
+
                       </div>
                     </td>
                   </tr>
@@ -264,7 +286,7 @@ const AdministrarCreditos = () => {
               })
             ) : (
               <tr>
-                <td colSpan={5} className="p-4 text-center">
+                <td colSpan={6} className="p-4 text-center">
                   No se encontraron créditos
                 </td>
               </tr>

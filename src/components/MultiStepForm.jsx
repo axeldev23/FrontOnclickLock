@@ -23,6 +23,7 @@ function MultiStepForm() {
     cliente_id: '',
     cliente: {
       nombre_completo: '',
+      clave_elector: '',  // Agregar clave de elector aquí
       fecha_nacimiento: '',
       domicilio_actual: '',
       correo_electronico: '',
@@ -118,8 +119,13 @@ function MultiStepForm() {
           foto_identificacion: formData.cliente.foto_identificacion ? formData.cliente.foto_identificacion : ""
         };
         console.log('Petición a createCliente con datos:', JSON.stringify(clienteData));
-        const clienteResponse = await createCliente(clienteData);
-        clienteId = clienteResponse.id;
+        const { data, status } = await createCliente(clienteData);
+        if (status !== 201) { // Ajusta este valor si el código de estado esperado es diferente
+          toast.error(data.clave_elector?.[0] || "Error al crear el cliente");
+          setIsLoading(false);
+          return;
+        }
+        clienteId = data.id;
       }
 
       const prestamoData = {
@@ -128,15 +134,21 @@ function MultiStepForm() {
         ...formData.credito
       };
       console.log('Petición a createPrestamo con datos:', JSON.stringify(prestamoData));
-      const prestamoResponse = await createPrestamo(prestamoData);
+      const { data: prestamoDataResponse, status: prestamoStatus } = await createPrestamo(prestamoData);
 
-      // Guardar el ID del préstamo y mostrar el modal de éxito
-      setPrestamoId(prestamoResponse.id);
-      setIsModalOpen(true);
+      if (prestamoStatus === 202 || prestamoStatus === 201) {
+        // Guardar el ID del préstamo y mostrar el modal de éxito
+        setPrestamoId(prestamoDataResponse.id);
+        setIsModalOpen(true);
+      } else {
+        toast.error(prestamoDataResponse.message || "Error al crear el préstamo");
+      }
+
       setIsLoading(false);  // Ocultar el loading
 
     } catch (error) {
       console.error('Error creando préstamo:', error);
+      toast.error(error.response?.data?.message || "Error desconocido al crear el préstamo");
       setIsLoading(false);  // Ocultar el loading
     }
   };
@@ -148,6 +160,7 @@ function MultiStepForm() {
       cliente_id: '',
       cliente: {
         nombre_completo: '',
+        clave_elector: '',  // Agregar clave de elector aquí
         fecha_nacimiento: '',
         domicilio_actual: '',
         correo_electronico: '',
@@ -233,11 +246,9 @@ function MultiStepForm() {
           </div>
           <div className="p-2 mt-2 text-center space-y-1 md:block  ">
             <div className='flex flex-col items-center justify-center gap-3'>
-            <PaymentSchedulePDF prestamoId={prestamoId} />
-            
-            <ContratoCreditoPDF prestamoId={prestamoId} />
+              <PaymentSchedulePDF prestamoId={prestamoId} />
+              <ContratoCreditoPDF prestamoId={prestamoId} />
             </div>
-            
             <br />
             <br />
             <button

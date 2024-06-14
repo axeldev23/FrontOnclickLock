@@ -6,6 +6,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './components/context/AuthContext';
 import { useContext } from 'react';
 import Layout from './components/Layout';
+import EditarCliente from './components/EditarCliente';
 
 
 
@@ -23,6 +24,8 @@ function App() {
         <Route element={<Layout />}>
         <Route path="/" element={<PrivateRoute element={<MultiStepForm />} />} />
         <Route path="/administrar-creditos" element={<PrivateRoute element={<AdminstrarCreditos />} />} />
+        <Route path="/editar-cliente/:id" element={<EditarCliente />} />
+
         </Route>
       </Routes>
     </AuthProvider>
