@@ -255,3 +255,30 @@ export const generarPagare = async (data) => {
       throw error;
   }
 };
+
+
+// Generar Tabla de Amortización
+export const generarAmortizacion = async (data) => {
+  try {
+      const response = await fetch(`${API_URL}/generar-contrato/`, {
+          method: 'POST',
+          body: data, // Usamos FormData directamente
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to generate amortizacion');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `amortizacion_${data.get('nombre_completo')}.docx`; // Accedemos al nombre desde FormData
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+  } catch (error) {
+      console.error('Error en generarAmortizacion:', error);
+      throw error;
+  }
+};
