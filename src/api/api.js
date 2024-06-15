@@ -1,5 +1,5 @@
-const API_URL = 'https://gestionprestamos-server.onrender.com/api';
-//const API_URL = 'http://localhost:8000/api';
+//const API_URL = 'https://gestionprestamos-server.onrender.com/api';
+const API_URL = 'http://localhost:8000/api';
 
 
 // Clientes
@@ -223,5 +223,35 @@ export const downloadImage = async (clienteId) => {
   } catch (error) {
     console.error('Error en downloadImage:', error);
     throw error;
+  }
+};
+
+
+// Generar Pagaré
+export const generarPagare = async (data) => {
+  try {
+      const response = await fetch(`${API_URL}/generar-pagare/`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+          throw new Error('Failed to generate pagare');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pagare_${data.id}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+  } catch (error) {
+      console.error('Error en generarPagare:', error);
+      throw error;
   }
 };
