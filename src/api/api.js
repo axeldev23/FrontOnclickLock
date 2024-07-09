@@ -208,24 +208,35 @@ export const login = async (username, password) => {
 // Descargar imagen
 export const downloadImage = async (clienteId) => {
   try {
+    console.log(`Iniciando descarga de imagen para el cliente ID: ${clienteId}`);
+
     const response = await fetch(`${API_URL}/download_image/${clienteId}/`);
+    console.log(`Respuesta de la solicitud de descarga:`, response);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error en la respuesta de la red:', errorText);
       throw new Error('Network response was not ok');
     }
+
     const blob = await response.blob();
+    console.log('Blob de la imagen recibida:', blob);
+
     const url = window.URL.createObjectURL(blob);
+    console.log('URL creada para el blob:', url);
+
     const a = document.createElement('a');
     a.href = url;
     a.download = 'image.jpg'; // O el nombre de archivo que desees
     document.body.appendChild(a);
     a.click();
     a.remove();
+    console.log('Imagen descargada exitosamente.');
   } catch (error) {
     console.error('Error en downloadImage:', error);
     throw error;
   }
 };
-
 
 // Generar Pagaré
 export const generarPagare = async (data) => {
@@ -259,23 +270,39 @@ export const generarPagare = async (data) => {
 
 // Generar Tabla de Amortización
 export const generarAmortizacion = async (data) => {
+  console.log('Iniciando generación de amortización...');
+
+  // Mostrar los datos que se están enviando
+  for (let pair of data.entries()) {
+    console.log(pair[0]+ ': ' + pair[1]);
+  }
+
   try {
       const response = await fetch(`${API_URL}/generar-contrato/`, {
           method: 'POST',
           body: data, // Usamos FormData directamente
       });
 
+      console.log('Respuesta del servidor recibida:', response);
+
       if (!response.ok) {
+          console.error('Error en la respuesta del servidor:', response.status, response.statusText);
           throw new Error('Failed to generate amortizacion');
       }
 
       const blob = await response.blob();
+      console.log('Blob creado:', blob);
+
       const url = window.URL.createObjectURL(blob);
+      console.log('URL de Blob:', url);
+
       const a = document.createElement('a');
       a.href = url;
       a.download = `amortizacion_${data.get('nombre_completo')}.docx`; // Accedemos al nombre desde FormData
       document.body.appendChild(a);
       a.click();
+      console.log('Descarga iniciada para:', a.download);
+
       a.remove();
   } catch (error) {
       console.error('Error en generarAmortizacion:', error);

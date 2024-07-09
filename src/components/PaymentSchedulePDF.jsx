@@ -12,14 +12,20 @@ const PaymentSchedulePDF = ({ prestamoId }) => {
             const {
                 monto_credito,
                 interes,
+                imei,
                 plazo_credito,
                 equipo_a_adquirir,
                 fecha_inicio,
-                pago_inicial
+                pago_inicial,
+                id,
+
             } = prestamo;
 
             const {
                 nombre_completo,
+                
+                domicilio_actual,
+                numero_telefono,
                 clave_elector
             } = cliente;
 
@@ -41,6 +47,12 @@ const PaymentSchedulePDF = ({ prestamoId }) => {
             data.append('monto_parcialidad', montoSemanal.toFixed(2));
             data.append('fecha_inicial', format(fechaPrimerPago, 'yyyy-MM-dd')); // Fecha de inicio del primer pago
             data.append('total_a_pagar', totalPagar.toFixed(2));
+            data.append('fecha_inicio', format(fecha_inicio, 'yyyy-MM-dd'));
+            data.append('imei', imei);
+            data.append('prestamo_id', id);
+            data.append('domicilio_actual', domicilio_actual);
+            data.append('numero_telefono', numero_telefono);
+
 
             await generarAmortizacion(data);
         } catch (error) {
