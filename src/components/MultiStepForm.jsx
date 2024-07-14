@@ -105,18 +105,30 @@ function MultiStepForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsLoading(true);  // Mostrar el loading
-    if (parseFloat(formData.credito.monto_credito) > parseFloat(formData.equipo.equipo_precio)) {
+
+    // Redondear monto_credito a dos decimales antes de enviarlo
+    const roundedMontoCredito = parseFloat(formData.credito.monto_credito).toFixed(2);
+    const updatedFormData = {
+      ...formData,
+      credito: {
+        ...formData.credito,
+        monto_credito: roundedMontoCredito
+      }
+    };
+
+    if (parseFloat(updatedFormData.credito.monto_credito) > parseFloat(updatedFormData.equipo.equipo_precio)) {
       toast.error("El monto del crédito no puede ser superior al precio del equipo.");
       setIsLoading(false);  // Ocultar el loading
       return;
     }
-    console.log('Datos del formulario:', formData);
+    console.log('Datos del formulario:', updatedFormData);
+
     try {
       let clienteId = formData.cliente_id;
       if (isNewClient) {
         const clienteData = {
-          ...formData.cliente,
-          foto_identificacion: formData.cliente.foto_identificacion ? formData.cliente.foto_identificacion : ""
+          ...updatedFormData.cliente,
+          foto_identificacion: updatedFormData.cliente.foto_identificacion ? updatedFormData.cliente.foto_identificacion : ""
         };
         console.log('Petición a createCliente con datos:', JSON.stringify(clienteData));
         const { data, status } = await createCliente(clienteData);
@@ -130,8 +142,8 @@ function MultiStepForm() {
 
       const prestamoData = {
         cliente: clienteId,
-        ...formData.equipo,
-        ...formData.credito
+        ...updatedFormData.equipo,
+        ...updatedFormData.credito
       };
       console.log('Petición a createPrestamo con datos:', JSON.stringify(prestamoData));
       const { data: prestamoDataResponse, status: prestamoStatus } = await createPrestamo(prestamoData);

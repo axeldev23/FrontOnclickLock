@@ -3,7 +3,10 @@ import { toast } from 'react-toastify';
 
 function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equipoPrecio }) {
     const handleNext = () => {
-        if (values.plazo_credito && values.monto_credito && values.pago_inicial && values.interes) {
+        // Redondear el valor de monto_credito antes de validar
+        const monto_credito = parseFloat(values.monto_credito).toFixed(2);
+
+        if (values.plazo_credito && monto_credito && values.pago_inicial && values.interes) {
             if (parseFloat(values.pago_inicial) < parseFloat(equipoPrecio)) {
                 handleShowCotizacion();
             } else {
@@ -13,6 +16,13 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
             toast.error("Por favor, complete todos los campos antes de continuar.");
         }
     }
+
+    const handleMontoCreditoChange = (event) => {
+        const { name, value } = event.target;
+        // Formatear el valor del campo para que solo tenga dos decimales
+        const formattedValue = parseFloat(value).toFixed(2);
+        handleChange({ target: { name, value: formattedValue } });
+    };
 
     return (
         <div className='flex justify-center w-full px-4 md:px-8 lg:px-16'>
@@ -46,8 +56,8 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
                                 type="number"
                                 name="monto_credito"
                                 id="monto_credito"
-                                value={values.monto_credito || ''}
-                                onChange={handleChange}
+                                value={values.monto_credito ? parseFloat(values.monto_credito).toFixed(2) : ''}
+                                onChange={handleMontoCreditoChange}
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 required
                                 readOnly // Evitar que el usuario edite este campo directamente
