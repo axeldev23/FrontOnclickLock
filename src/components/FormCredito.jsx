@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 
 function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equipoPrecio }) {
@@ -7,11 +6,9 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
 
     useEffect(() => {
         if (autoSelectDate) {
-            const fetchCurrentDate = async () => {
+            const fetchCurrentDate = () => {
                 try {
-                    // Utilizamos una API pública para obtener la fecha y hora actual
-                    const response = await axios.get('http://worldtimeapi.org/api/timezone/Etc/UTC');
-                    const currentDate = new Date(response.data.datetime);
+                    const currentDate = new Date();
                     let nextThursdayOrSunday = new Date(currentDate);
 
                     // Encontrar el próximo jueves o domingo
@@ -22,13 +19,13 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
                         daysToAdd = (7 - dayOfWeek) % 7; // Calcula los días hasta el próximo domingo
                     }
 
-                    nextThursdayOrSunday.setDate(currentDate.getDate() + daysToAdd - 1); // Restar un día
+                    nextThursdayOrSunday.setDate(currentDate.getDate() + daysToAdd-1); // Ajustar la fecha
 
                     // Formatear la fecha en YYYY-MM-DD
                     const formattedDate = nextThursdayOrSunday.toISOString().split('T')[0];
                     handleChange({ target: { name: 'fecha_primer_pago', value: formattedDate } });
                 } catch (error) {
-                    console.error('Error fetching date from API', error);
+                    console.error('Error fetching date from browser', error);
                     toast.error("Error al obtener la fecha actual. Por favor, intente nuevamente.");
                 }
             };
