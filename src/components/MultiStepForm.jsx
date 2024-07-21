@@ -39,7 +39,8 @@ function MultiStepForm() {
       plazo_credito: '',
       monto_credito: '',
       pago_inicial: '',
-      interes: ''
+      interes: '',
+      fecha_primer_pago: '' // Agregar el campo fecha_primer_pago
     }
   });
 
@@ -188,7 +189,8 @@ function MultiStepForm() {
         plazo_credito: '',
         monto_credito: '',
         pago_inicial: '',
-        interes: ''
+        interes: '',
+        fecha_primer_pago: '' // Resetear el campo fecha_primer_pago
       }
     });
     setStep(1);

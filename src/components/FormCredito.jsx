@@ -1,7 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 
 function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equipoPrecio }) {
+    const [autoSelectDate, setAutoSelectDate] = useState(false);
+
+    useEffect(() => {
+        if (autoSelectDate) {
+            const fetchCurrentDate = async () => {
+                try {
+                    // Utilizamos una API pública para obtener la fecha y hora actual
+                    const response = await axios.get('http://worldtimeapi.org/api/timezone/Etc/UTC');
+                    const currentDate = new Date(response.data.datetime);
+                    let nextThursdayOrSunday = new Date(currentDate);
+
+                    // Encontrar el próximo jueves o domingo
+                    const dayOfWeek = currentDate.getDay();
+                    let daysToAdd = (dayOfWeek <= 4) ? (4 - dayOfWeek) : (7 - dayOfWeek + 4); // Calcula los días hasta el próximo jueves
+
+                    if (daysToAdd === 0 || daysToAdd > 3) {
+                        daysToAdd = (7 - dayOfWeek) % 7; // Calcula los días hasta el próximo domingo
+                    }
+
+                    nextThursdayOrSunday.setDate(currentDate.getDate() + daysToAdd - 1); // Restar un día
+
+                    // Formatear la fecha en YYYY-MM-DD
+                    const formattedDate = nextThursdayOrSunday.toISOString().split('T')[0];
+                    handleChange({ target: { name: 'fecha_primer_pago', value: formattedDate } });
+                } catch (error) {
+                    console.error('Error fetching date from API', error);
+                    toast.error("Error al obtener la fecha actual. Por favor, intente nuevamente.");
+                }
+            };
+
+            fetchCurrentDate();
+        }
+    }, [autoSelectDate, handleChange]);
+
     const handleNext = () => {
         // Redondear el valor de monto_credito antes de validar
         const monto_credito = parseFloat(values.monto_credito).toFixed(2);
@@ -15,7 +50,7 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
         } else {
             toast.error("Por favor, complete todos los campos antes de continuar.");
         }
-    }
+    };
 
     const handleMontoCreditoChange = (event) => {
         const { name, value } = event.target;
@@ -95,6 +130,37 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
                                 onChange={handleChange}
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="text-left mt-8">
+                        <label htmlFor="auto_select_date" className="block text-sm font-medium leading-6 text-gray-900 dark:text-white">
+                            Fecha del Primer Pago
+                        </label>
+                        <div className="flex items-center mt-2">
+                            <input
+                                type="checkbox"
+                                id="auto_select_date"
+                                name="auto_select_date"
+                                checked={autoSelectDate}
+                                onChange={(e) => setAutoSelectDate(e.target.checked)}
+                                className="mr-2"
+                            />
+                            <label htmlFor="auto_select_date" className="text-sm font-medium text-gray-900 dark:text-white">
+                                Seleccionar automáticamente el jueves o domingo más próximo
+                            </label>
+                        </div>
+                        <div className="mt-2">
+                            <input
+                                type="date"
+                                name="fecha_primer_pago"
+                                id="fecha_primer_pago"
+                                value={values.fecha_primer_pago || ''}
+                                onChange={handleChange}
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                required
+                                disabled={autoSelectDate}
                             />
                         </div>
                     </div>

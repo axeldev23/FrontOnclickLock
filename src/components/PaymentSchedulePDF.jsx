@@ -18,6 +18,7 @@ const PaymentSchedulePDF = ({ prestamoId }) => {
                 fecha_inicio,
                 pago_inicial,
                 id,
+                fecha_primer_pago
 
             } = prestamo;
 
@@ -34,8 +35,7 @@ const PaymentSchedulePDF = ({ prestamoId }) => {
             const totalPagar = parseFloat(monto_credito) + interesSimple;
             const montoSemanal = totalPagar / plazo_credito;
 
-            // Calcula la fecha de inicio del primer pago sumando 7 días
-            const fechaPrimerPago = addDays(new Date(fecha_inicio), 7);
+      
 
             const data = new FormData();
             data.append('nombre_completo', nombre_completo);
@@ -45,7 +45,7 @@ const PaymentSchedulePDF = ({ prestamoId }) => {
             data.append('monto_credito', monto_credito);
             data.append('plazo_credito', plazo_credito);
             data.append('monto_parcialidad', montoSemanal.toFixed(2));
-            data.append('fecha_inicial', format(fechaPrimerPago, 'yyyy-MM-dd')); // Fecha de inicio del primer pago
+            data.append('fecha_primer_pago', fecha_primer_pago); // Fecha de inicio del primer pago
             data.append('total_a_pagar', totalPagar.toFixed(2));
             data.append('fecha_inicio', format(fecha_inicio, 'yyyy-MM-dd'));
             data.append('imei', imei);
