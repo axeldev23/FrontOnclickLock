@@ -8,18 +8,36 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
         if (autoSelectDate) {
             const fetchCurrentDate = () => {
                 try {
+                    // Fecha actual
                     const currentDate = new Date();
-                    let nextThursdayOrSunday = new Date(currentDate);
 
+                    // Para simular otra fecha, por ejemplo, la fecha de ayer:
+                    const simulatedDate = new Date();
+                    simulatedDate.setDate(simulatedDate.getDate()); // Cambiar el número de días para simular otra fecha
+
+                    let nextThursdayOrSunday = new Date(simulatedDate);
+
+                    const dayOfWeek = simulatedDate.getDay();
+
+                    // Si hoy es domingo (0), el próximo jueves es en 4 días
+                    if (dayOfWeek === 0) {
+                        nextThursdayOrSunday.setDate(simulatedDate.getDate() + 4);
+                    } 
+                    // Si hoy es jueves (4), el próximo domingo es en 3 días
+                    else if (dayOfWeek === 4) {
+                        nextThursdayOrSunday.setDate(simulatedDate.getDate() + 3);
+                    } 
                     // Encontrar el próximo jueves o domingo
-                    const dayOfWeek = currentDate.getDay();
-                    let daysToAdd = (dayOfWeek <= 4) ? (4 - dayOfWeek) : (7 - dayOfWeek + 4); // Calcula los días hasta el próximo jueves
-
-                    if (daysToAdd === 0 || daysToAdd > 3) {
-                        daysToAdd = (7 - dayOfWeek) % 7; // Calcula los días hasta el próximo domingo
+                    else {
+                        let daysToAdd = (dayOfWeek <= 4) ? (4 - dayOfWeek) : (7 - dayOfWeek + 4); // Calcula los días hasta el próximo jueves
+                        if (daysToAdd === 0 || daysToAdd > 3) {
+                            daysToAdd = (7 - dayOfWeek) % 7; // Calcula los días hasta el próximo domingo
+                        }
+                        nextThursdayOrSunday.setDate(simulatedDate.getDate() + daysToAdd); // Ajustar la fecha
                     }
 
-                    nextThursdayOrSunday.setDate(currentDate.getDate() + daysToAdd-1); // Ajustar la fecha
+                    // Restar un día
+                    nextThursdayOrSunday.setDate(nextThursdayOrSunday.getDate() - 1);
 
                     // Formatear la fecha en YYYY-MM-DD
                     const formattedDate = nextThursdayOrSunday.toISOString().split('T')[0];
@@ -32,7 +50,7 @@ function FormCredito({ prevStep, handleChange, values, handleShowCotizacion, equ
 
             fetchCurrentDate();
         }
-    }, [autoSelectDate, handleChange]);
+    }, [autoSelectDate]); // Dependencia solo de autoSelectDate
 
     const handleNext = () => {
         // Redondear el valor de monto_credito antes de validar
