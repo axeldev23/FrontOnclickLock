@@ -1,5 +1,5 @@
-const API_URL = 'https://gestionprestamos-server.onrender.com/api';
-//const API_URL = 'http://localhost:8000/api';
+//const API_URL = 'https://gestionprestamos-server.onrender.com/api';
+const API_URL = 'http://localhost:8000/api';
 
 
 // Clientes
@@ -307,5 +307,29 @@ export const generarAmortizacion = async (data) => {
   } catch (error) {
       console.error('Error en generarAmortizacion:', error);
       throw error;
+  }
+};
+
+// Obtener usuario por ID
+export const getUserById = async (id) => {
+  try {
+    const response = await fetch(`${API_URL}/get_user_by_id/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user');
+    }
+
+    const data = await response.json();
+    console.log('Respuesta de getUserById:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en getUserById:', error);
+    throw error;
   }
 };

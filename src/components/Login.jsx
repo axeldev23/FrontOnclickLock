@@ -21,6 +21,7 @@ export default function Login() {
 
         try {
             const data = await loginAPI(username, password);
+            console.log('Datos de autenticación:', data);
             login(data.user, data.token);
         } catch (error) {
             console.error('Error en la autenticación', error);

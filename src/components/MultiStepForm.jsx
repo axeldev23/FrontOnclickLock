@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import FormCliente from './FormCliente';
 import FormEquipo from './FormEquipo';
 import FormCredito from './FormCredito';
@@ -9,6 +9,7 @@ import Modal from 'react-modal';
 import PaymentSchedulePDF from './PaymentSchedulePDF';
 import { FaCheckCircle } from "react-icons/fa";
 import ContratoCreditoPDF from './ContratoCredito';
+import { AuthContext } from './context/AuthContext'; // Importa el contexto de autenticación
 
 Modal.setAppElement('#root');
 
@@ -19,11 +20,14 @@ function MultiStepForm() {
   const [prestamoId, setPrestamoId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { user } = useContext(AuthContext); // Usa el contexto de autenticación para obtener el usuario
+
+
   const [formData, setFormData] = useState({
     cliente_id: '',
     cliente: {
       nombre_completo: '',
-      clave_elector: '',  // Agregar clave de elector aquí
+      clave_elector: '',
       fecha_nacimiento: '',
       domicilio_actual: '',
       correo_electronico: '',
@@ -40,12 +44,11 @@ function MultiStepForm() {
       monto_credito: '',
       pago_inicial: '',
       interes: '',
-      fecha_primer_pago: '' // Agregar el campo fecha_primer_pago
+      fecha_primer_pago: ''
     }
   });
 
   useEffect(() => {
-    // Actualiza monto_credito basado en equipo_precio y pago_inicial
     const updatedMontoCredito = formData.equipo.equipo_precio - (formData.credito.pago_inicial || 0);
     setFormData(prevState => ({
       ...prevState,
@@ -55,6 +58,10 @@ function MultiStepForm() {
       }
     }));
   }, [formData.equipo.equipo_precio, formData.credito.pago_inicial]);
+
+
+
+
 
   const nextStep = () => {
     if (step === 2 && parseFloat(formData.credito.monto_credito) > parseFloat(formData.equipo.equipo_precio)) {
@@ -105,9 +112,8 @@ function MultiStepForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsLoading(true);  // Mostrar el loading
+    setIsLoading(true);
 
-    // Redondear monto_credito a dos decimales antes de enviarlo
     const roundedMontoCredito = parseFloat(formData.credito.monto_credito).toFixed(2);
     const updatedFormData = {
       ...formData,
@@ -119,7 +125,7 @@ function MultiStepForm() {
 
     if (parseFloat(updatedFormData.credito.monto_credito) > parseFloat(updatedFormData.equipo.equipo_precio)) {
       toast.error("El monto del crédito no puede ser superior al precio del equipo.");
-      setIsLoading(false);  // Ocultar el loading
+      setIsLoading(false);
       return;
     }
     console.log('Datos del formulario:', updatedFormData);
@@ -133,7 +139,7 @@ function MultiStepForm() {
         };
         console.log('Petición a createCliente con datos:', JSON.stringify(clienteData));
         const { data, status } = await createCliente(clienteData);
-        if (status !== 201) { // Ajusta este valor si el código de estado esperado es diferente
+        if (status !== 201) {
           toast.error(data.clave_elector?.[0] || "Error al crear el cliente");
           setIsLoading(false);
           return;
@@ -144,36 +150,35 @@ function MultiStepForm() {
       const prestamoData = {
         cliente: clienteId,
         ...updatedFormData.equipo,
-        ...updatedFormData.credito
+        ...updatedFormData.credito,
+        creado_por: user.id // Añade el usuario actual al objeto prestamoData
       };
       console.log('Petición a createPrestamo con datos:', JSON.stringify(prestamoData));
       const { data: prestamoDataResponse, status: prestamoStatus } = await createPrestamo(prestamoData);
 
       if (prestamoStatus === 202 || prestamoStatus === 201) {
-        // Guardar el ID del préstamo y mostrar el modal de éxito
         setPrestamoId(prestamoDataResponse.id);
         setIsModalOpen(true);
       } else {
         toast.error(prestamoDataResponse.message || "Error al crear el préstamo");
       }
 
-      setIsLoading(false);  // Ocultar el loading
+      setIsLoading(false);
 
     } catch (error) {
       console.error('Error creando préstamo:', error);
       toast.error(error.response?.data?.message || "Error desconocido al crear el préstamo");
-      setIsLoading(false);  // Ocultar el loading
+      setIsLoading(false);
     }
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    // Limpiar los datos del formulario
     setFormData({
       cliente_id: '',
       cliente: {
         nombre_completo: '',
-        clave_elector: '',  // Agregar clave de elector aquí
+        clave_elector: '',
         fecha_nacimiento: '',
         domicilio_actual: '',
         correo_electronico: '',
@@ -190,7 +195,7 @@ function MultiStepForm() {
         monto_credito: '',
         pago_inicial: '',
         interes: '',
-        fecha_primer_pago: '' // Resetear el campo fecha_primer_pago
+        fecha_primer_pago: ''
       }
     });
     setStep(1);
@@ -238,7 +243,7 @@ function MultiStepForm() {
           values={formData.credito}
           prevStep={prevStep}
           handleSubmit={handleSubmit}
-          isLoading={isLoading}  // Pasar el estado de carga
+          isLoading={isLoading}
         />
       )}
       <Modal

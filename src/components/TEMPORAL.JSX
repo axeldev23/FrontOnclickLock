@@ -16,10 +16,11 @@ import {
   Tooltip,
 } from '@material-tailwind/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { fetchClientes, fetchPrestamos, updatePrestamo, downloadImage, getUserById } from '../api/api';
+import { fetchClientes, fetchPrestamos, updatePrestamo, downloadImage } from '../api/api';
 import PaymentSchedulePDF from './PaymentSchedulePDF';
 import ContratoCreditoPDF from './ContratoCredito';
 import { AuthContext } from './context/AuthContext'; // Importa el contexto de autenticación
+
 
 const TABS = [
   {
@@ -43,9 +44,9 @@ const AdministrarCreditos = () => {
   const [estadoFilter, setEstadoFilter] = useState('ACTIVO');
   const [currentPage, setCurrentPage] = useState(1);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [usuarios, setUsuarios] = useState({}); // Estado para almacenar usuarios
 
   const { user } = useContext(AuthContext); // Usa el contexto de autenticación para obtener el usuario
+
 
   useEffect(() => {
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -61,25 +62,14 @@ const AdministrarCreditos = () => {
       try {
         const prestamosData = await fetchPrestamos();
         const clientesData = await fetchClientes();
-  
-        // Ordenar los préstamos por fecha de creación en orden descendente
-        const sortedPrestamos = prestamosData.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
-  
+
+        // Ordenar los préstamos por fecha de creación en orden ascendente y luego invertirlos
+        const sortedPrestamos = prestamosData.sort(
+          (a, b) => new Date(a.fecha_creacion) - new Date(b.fecha_creacion)
+        ).reverse();
+
         setPrestamos(sortedPrestamos);
         setClientes(clientesData);
-
-        // Obtener los usuarios que crearon los préstamos
-        const usuariosData = {};
-        const uniqueUserIds = [...new Set(sortedPrestamos.map(p => p.creado_por))];
-        for (const userId of uniqueUserIds) {
-          try {
-            const userData = await getUserById(userId);
-            usuariosData[userId] = userData.username;
-          } catch (error) {
-            console.error('Error fetching user by ID:', error);
-          }
-        }
-        setUsuarios(usuariosData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -203,7 +193,7 @@ const AdministrarCreditos = () => {
             {currentPrestamos.length > 0 ? (
               currentPrestamos.map((prestamo, index) => {
                 const cliente = clientes.find((cliente) => cliente.id === prestamo.cliente);
-                const creadoPor = user.is_staff ? usuarios[prestamo.creado_por] : null;
+                const creadoPor = user.is_staff && cliente ? clientes.find((cliente) => cliente.id === prestamo.creado_por) : null;
 
                 const isLast = index === currentPrestamos.length - 1;
                 const classes = isLast ? 'p-4' : 'p-4 border-b border-blue-gray-50';
@@ -214,13 +204,13 @@ const AdministrarCreditos = () => {
                       <td className={classes}>
                         <div className="flex items-center gap-3 md:pl-4">
                           <Avatar
-                            src={`https://ui-avatars.com/api/?name=${creadoPor || 'N/A'}&background=random`}
-                            alt={creadoPor || 'N/A'}
+                            src={`https://ui-avatars.com/api/?name=${creadoPor ? creadoPor.nombre_completo : 'N/A'}&background=random`}
+                            alt={creadoPor ? creadoPor.nombre_completo : 'N/A'}
                             size="sm"
                           />
                           <div className="flex flex-col">
                             <Typography variant="small" color="blue-gray" className="font-normal dark:text-white">
-                              {creadoPor || 'N/A'}
+                              {creadoPor ? creadoPor.nombre_completo : 'N/A'}
                             </Typography>
                           </div>
                         </div>
