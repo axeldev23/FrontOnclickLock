@@ -1,9 +1,9 @@
 import React from 'react';
-import { fetchPrestamo, fetchCliente, generarAmortizacion } from '../api/api'; // Asegúrate de ajustar la ruta del import
+import { fetchPrestamo, fetchCliente, generarAmortizacion } from '../../api/api'; // Asegúrate de ajustar la ruta del import
 import { format, addDays } from 'date-fns'; // Asegúrate de tener date-fns instalado
 import { Button } from "@material-tailwind/react";
 
-const PaymentSchedulePDF = ({ prestamoId }) => {
+const GenerarAmortizacion = ({ prestamoId }) => {
     const generateAmortizacion = async () => {
         try {
             const prestamo = await fetchPrestamo(prestamoId);
@@ -70,4 +70,4 @@ const PaymentSchedulePDF = ({ prestamoId }) => {
     );
 };
 
-export default PaymentSchedulePDF;
+export default GenerarAmortizacion;

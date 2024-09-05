@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Layout from './Layout';
+import Layout from '../Layout/Layout';
 import { PhotoIcon } from '@heroicons/react/20/solid';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Select from 'react-select';
-import { fetchClientes } from '../api/api';
+import { fetchClientes } from '../../api/api';
 import { toast } from 'react-toastify';
 import { Input } from "@material-tailwind/react";
 

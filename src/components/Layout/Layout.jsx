@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { Outlet as PageContent } from 'react-router-dom';
 
@@ -18,8 +18,11 @@ const Layout = ({ children }) => {
       setSelectedTab(1);
     } else if (location.pathname === '/administrar-creditos' || location.pathname.startsWith('/editar-cliente/')) {
       setSelectedTab(2);
+    }
+    else if (location.pathname === '/pagos') {
+      setSelectedTab(3);
     } else {
-      setSelectedTab(1);
+      setSelectedTab(1);s
     }
   }, [location.pathname]);
   const handleTabChange = (tabIndex, path) => {
@@ -28,7 +31,7 @@ const Layout = ({ children }) => {
   };
 
   const handleNavigateToProfile = () => {
-    window.location.href='https://gestionprestamos-server.onrender.com/admin/';
+    window.location.href = 'https://gestionprestamos-server.onrender.com/admin/';
   };
 
   const handleClickOutside = (event) => {
@@ -123,7 +126,7 @@ const Layout = ({ children }) => {
 
       <div className="w-full mt-24">
         <div className="flex justify-center bg-transparent p-3 rounded-b-lg">
-          <div className="relative flex items-center bg-slider-color shadow-md p-0 rounded-full space-x-2">
+          <div className="relative flex items-center bg-slider-color shadow-md p-0 rounded-full ">
             <input
               type="radio"
               id="radio-1"
@@ -134,10 +137,10 @@ const Layout = ({ children }) => {
             />
             <label
               htmlFor="radio-1"
-              className={`tab flex items-center z-10 justify-center h-8 w-36 text-sm  font-medium rounded-full cursor-pointer transition-colors ${selectedTab === 1 ? 'text-white' : 'text-black'
+              className={`tab flex items-center z-10 justify-center h-8 w-40 text-sm  font-medium rounded-full cursor-pointer transition-colors ${selectedTab === 1 ? 'text-white' : 'text-black'
                 }`}
             >
-              Registrar Crédito
+              Cotizar Crédito
             </label>
 
             <input
@@ -150,15 +153,19 @@ const Layout = ({ children }) => {
             />
             <label
               htmlFor="radio-2"
-              className={`tab flex items-center z-10 justify-center h-8 w-36 text-sm font-medium rounded-full cursor-pointer transition-colors ${selectedTab === 2 ? 'text-white' : 'text-black'
+              className={`tab flex items-center z-10 justify-center h-8 w-40 text-sm font-medium rounded-full cursor-pointer transition-colors ${selectedTab === 2 ? 'text-white' : 'text-black'
                 }`}
             >
               Administrar Créditos
             </label>
 
+
+         
+
+
             <span
               className="glider absolute h-8 w-40 bg-slider-color-button rounded-full transition-transform "
-              style={{ transform: `translateX(${(selectedTab - 1.06) * 91}%)` }}
+              style={{ transform: `translateX(${(selectedTab - 1.0) * 100}%)` }}
             />
           </div>
         </div>

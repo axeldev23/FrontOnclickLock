@@ -1,9 +1,9 @@
 import React from 'react';
-import { fetchPrestamo, fetchCliente, generarPagare } from '../api/api'; // Ajusta la ruta según sea necesario
+import { fetchPrestamo, fetchCliente, generarPagare } from '../../api/api'; // Ajusta la ruta según sea necesario
 import { format, addWeeks, addDays } from 'date-fns'; // Asegúrate de tener date-fns instalado
 import { Button } from "@material-tailwind/react";
 
-const ContratoCreditoPDF = ({ prestamoId }) => {
+const GenerarPagare = ({ prestamoId }) => {
     const generatePagare = async () => {
         try {
             const prestamo = await fetchPrestamo(prestamoId);
@@ -68,4 +68,4 @@ const ContratoCreditoPDF = ({ prestamoId }) => {
     );
 };
 
-export default ContratoCreditoPDF;
+export default GenerarPagare;

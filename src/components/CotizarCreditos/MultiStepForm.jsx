@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import FormCliente from './FormCliente';
 import FormEquipo from './FormEquipo';
-import FormCredito from './FormCredito';
-import Cotizacion from './Cotizacion';
-import { createCliente, createPrestamo } from '../api/api';
+import ConfirmarRegistroCredito from './ConfirmarRegistroCredito';
+import { createCliente, createPrestamo } from '../../api/api';
 import { toast } from 'react-toastify';
-import Modal from 'react-modal';
-import PaymentSchedulePDF from './PaymentSchedulePDF';
+import { Button, Dialog, DialogHeader, DialogBody, DialogFooter, Typography } from '@material-tailwind/react';
+import GenerarAmortizacion from '../Formatos/GenerarAmortizacion';
 import { FaCheckCircle } from "react-icons/fa";
-import ContratoCreditoPDF from './ContratoCredito';
-import { AuthContext } from './context/AuthContext'; // Importa el contexto de autenticación
-
-Modal.setAppElement('#root');
+import GenerarPagare from '../Formatos/GenerarPagare';
+import { AuthContext } from '../context/AuthContext';
+import FormCotizacion from './FormCotizacion';
+import MostrarCotizacion from './MostrarCotizacion';
 
 function MultiStepForm() {
   const [step, setStep] = useState(1);
@@ -20,8 +19,7 @@ function MultiStepForm() {
   const [prestamoId, setPrestamoId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { user } = useContext(AuthContext); // Usa el contexto de autenticación para obtener el usuario
-
+  const { user } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     cliente_id: '',
@@ -33,10 +31,9 @@ function MultiStepForm() {
       correo_electronico: '',
       numero_telefono: '',
       foto_identificacion: null
-    }, 
+    },
     equipo: {
       equipo_a_adquirir: '',
-      equipo_precio: '',
       equipo_imei: ''
     },
     credito: {
@@ -44,43 +41,16 @@ function MultiStepForm() {
       monto_credito: '',
       pago_inicial: '',
       interes: '',
-      fecha_primer_pago: ''
+      fecha_primer_pago: '',
+      equipo_precio: ''
     }
   });
 
-  useEffect(() => {
-    const updatedMontoCredito = formData.equipo.equipo_precio - (formData.credito.pago_inicial || 0);
-    setFormData(prevState => ({
-      ...prevState,
-      credito: {
-        ...prevState.credito,
-        monto_credito: updatedMontoCredito
-      }
-    }));
-  }, [formData.equipo.equipo_precio, formData.credito.pago_inicial]);
-
-
-
-
-
   const nextStep = () => {
-    if (step === 2 && parseFloat(formData.credito.monto_credito) > parseFloat(formData.equipo.equipo_precio)) {
-      toast.error("El monto del crédito no puede ser superior al precio del equipo.");
-    } else {
-      setStep(step + 1);
-    }
+    setStep(step + 1);
   };
 
   const prevStep = () => {
-    if (step === 4) {
-      setFormData(prevState => ({
-        ...prevState,
-        credito: {
-          ...prevState.credito,
-          pago_inicial: '',
-        }
-      }));
-    }
     setStep(step - 1);
   };
 
@@ -106,15 +76,28 @@ function MultiStepForm() {
     }));
   };
 
+  const handleCotizacionSubmit = (cotizacionData) => {
+    setFormData(prevState => ({
+      ...prevState,
+      credito: {
+        ...prevState.credito,
+        ...cotizacionData
+      }
+    }));
+    nextStep();
+  };
+
   const handleShowCotizacion = () => {
-    setStep(4);
+    nextStep();
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsLoading(true);
 
-    const roundedMontoCredito = parseFloat(formData.credito.monto_credito).toFixed(2);
+    const montoCreditoNumber = parseFloat(formData.credito.monto_credito);
+    const roundedMontoCredito = !isNaN(montoCreditoNumber) ? montoCreditoNumber.toFixed(2) : '0.00';
+
     const updatedFormData = {
       ...formData,
       credito: {
@@ -123,12 +106,14 @@ function MultiStepForm() {
       }
     };
 
-    if (parseFloat(updatedFormData.credito.monto_credito) > parseFloat(updatedFormData.equipo.equipo_precio)) {
+    if (parseFloat(updatedFormData.credito.monto_credito) > parseFloat(updatedFormData.credito.equipo_precio)) {
       toast.error("El monto del crédito no puede ser superior al precio del equipo.");
       setIsLoading(false);
       return;
     }
-    console.log('Datos del formulario:', updatedFormData);
+
+    // Log the data before submitting
+    console.log('Datos antes de enviar a ConfirmarRegistroCredito:', JSON.stringify(updatedFormData));
 
     try {
       let clienteId = formData.cliente_id;
@@ -151,7 +136,7 @@ function MultiStepForm() {
         cliente: clienteId,
         ...updatedFormData.equipo,
         ...updatedFormData.credito,
-        creado_por: user.id // Añade el usuario actual al objeto prestamoData
+        creado_por: user.id
       };
       console.log('Petición a createPrestamo con datos:', JSON.stringify(prestamoData));
       const { data: prestamoDataResponse, status: prestamoStatus } = await createPrestamo(prestamoData);
@@ -187,7 +172,6 @@ function MultiStepForm() {
       },
       equipo: {
         equipo_a_adquirir: '',
-        equipo_precio: '',
         equipo_imei: ''
       },
       credito: {
@@ -195,7 +179,8 @@ function MultiStepForm() {
         monto_credito: '',
         pago_inicial: '',
         interes: '',
-        fecha_primer_pago: ''
+        fecha_primer_pago: '',
+        equipo_precio: ''
       }
     });
     setStep(1);
@@ -204,6 +189,19 @@ function MultiStepForm() {
   return (
     <>
       {step === 1 && (
+        <FormCotizacion
+          formData={formData.credito}
+          handleNext={handleCotizacionSubmit}
+        />
+      )}
+      {step === 2 && (
+        <MostrarCotizacion
+          values={formData.credito}
+          handleBack={prevStep}
+          handleContinue={nextStep}
+        />
+      )}
+      {step === 3 && (
         <FormCliente
           nextStep={nextStep}
           handleChange={handleChange('cliente')}
@@ -214,7 +212,7 @@ function MultiStepForm() {
           isNewClient={isNewClient}
         />
       )}
-      {step === 2 && (
+      {step === 4 && (
         <FormEquipo
           nextStep={nextStep}
           prevStep={prevStep}
@@ -229,56 +227,40 @@ function MultiStepForm() {
           }))}
         />
       )}
-      {step === 3 && (
-        <FormCredito
-          handleShowCotizacion={handleShowCotizacion}
-          prevStep={prevStep}
-          handleChange={handleChange('credito')}
-          values={formData.credito}
-          equipoPrecio={formData.equipo.equipo_precio}
-        />
-      )}
-      {step === 4 && (
-        <Cotizacion
+      {step === 5 && (
+        <ConfirmarRegistroCredito
           values={formData.credito}
           prevStep={prevStep}
           handleSubmit={handleSubmit}
           isLoading={isLoading}
         />
       )}
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={handleModalClose}
-        contentLabel="Éxito"
-        className="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-50 "
-        overlayClassName="fixed inset-0 bg-gray-900 bg-opacity-50 z-50"
-      >
-        <div className="bg-gray-800 border border-gray-800 shadow-lg rounded-2xl p-6 max-w-md w-full text-center">
-          <div className="text-center p-3 flex-auto justify-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto bg-green-100 rounded-full p-1">
-              <FaCheckCircle className="text-green-500 text-6xl" />
-            </div>
-            <h2 className="text-xl font-bold py-4 text-gray-200">¡Registro exitoso!</h2>
-            <p className="text-sm text-gray-200 px-2">
-              ¿Desea descargar el formato de pagos y el formato de compra?
-            </p>
+
+      {/* Notification Modal */}
+      <Dialog open={isModalOpen} handler={handleModalClose}>
+        <DialogHeader>
+          <Typography variant="h5" color="blue-gray">
+            ¡Registro Exitoso!
+          </Typography>
+        </DialogHeader>
+        <DialogBody divider className="grid place-items-center gap-4">
+          <FaCheckCircle className="h-16 w-16 text-green-500" />
+          <Typography variant="h4" color="green">
+            El préstamo se ha registrado correctamente.
+          </Typography>
+          <div className="text-center font-normal flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+            <GenerarPagare prestamoId={prestamoId} />
+            <GenerarAmortizacion prestamoId={prestamoId} />
           </div>
-          <div className="p-2 mt-2 text-center space-y-1 md:block  ">
-            <div className='flex flex-col items-center justify-center gap-3'>
-              <PaymentSchedulePDF prestamoId={prestamoId} />
-              <ContratoCreditoPDF prestamoId={prestamoId} />
-            </div>
-            <br />
-            <br />
-            <button
-              onClick={handleModalClose}
-              className="mb-2 md:mb-0 bg-gray-700 px-5 py-2 text-sm shadow-sm font-medium tracking-wider border-2 border-gray-600 hover:border-gray-700 text-gray-300 rounded hover:shadow-lg hover:bg-gray-800 transition ease-in duration-300"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </Modal>
+
+        </DialogBody>
+        <DialogFooter className="space-x-2">
+          
+          <Button variant="gradient" onClick={handleModalClose}>
+          Cerrar
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </>
   );
 }

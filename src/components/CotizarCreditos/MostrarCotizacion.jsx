@@ -1,10 +1,16 @@
 import React from 'react';
 
-function Cotizacion({ values, prevStep, handleSubmit, isLoading }) {
+function MostrarCotizacion({ values, handleBack, handleContinue }) {
     const { monto_credito, plazo_credito, interes } = values;
-    const interesSimple = monto_credito * (interes / 100);
-    const totalPagar = parseFloat(monto_credito) + interesSimple;
-    const montoSemanal = totalPagar / plazo_credito;
+
+    // Convertir los valores a números
+    const montoCreditoNum = parseFloat(monto_credito) || 0;
+    const plazoCreditoNum = parseInt(plazo_credito, 10) || 0;
+    const interesNum = parseFloat(interes) || 0;
+
+    const interesSimple = montoCreditoNum * (interesNum / 100);
+    const totalPagar = montoCreditoNum + interesSimple;
+    const montoSemanal = totalPagar / (plazoCreditoNum || 1); // Evitar división por 0
 
     return (
         <div className='flex justify-center w-full px-4 md:px-8 lg:px-16'>
@@ -12,23 +18,22 @@ function Cotizacion({ values, prevStep, handleSubmit, isLoading }) {
                 <div className="space-y-10">
                     <h1 className="text-xl w-full md:w-96 text-left mt-4 font-semibold">Cotización del Crédito</h1>
                     <div className="text-left">
-                        <p><strong>Monto del crédito:</strong> ${monto_credito.toFixed(2)}</p>
-                        <p><strong>Interés:</strong> {interes}%</p>
+                        <p><strong>Monto del crédito:</strong> ${montoCreditoNum.toFixed(2)}</p>
+                        <p><strong>Interés:</strong> {interesNum}%</p>
                         <p><strong>Total a pagar:</strong> ${totalPagar.toFixed(2)}</p>
-                        <p><strong>Plazo del crédito:</strong> {plazo_credito} semanas</p>
+                        <p><strong>Plazo del crédito:</strong> {plazoCreditoNum} semanas</p>
                         <p><strong>Parcialidades semanales:</strong> ${montoSemanal.toFixed(2)}</p>
                     </div>
                     <div className="flex justify-between">
-                        <button type="button" onClick={prevStep} className="rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white">
+                        <button type="button" onClick={handleBack} className="rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white">
                             Modificar
                         </button>
                         <button
                             type="button"
-                            onClick={handleSubmit}
+                            onClick={handleContinue}
                             className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white"
-                            disabled={isLoading} 
                         >
-                            {isLoading ? 'Registrando...' : 'Confirmar y Registrar'}  
+                            Continuar con el Registro
                         </button>
                     </div>
                 </div>
@@ -37,4 +42,4 @@ function Cotizacion({ values, prevStep, handleSubmit, isLoading }) {
     );
 }
 
-export default Cotizacion;
+export default MostrarCotizacion;

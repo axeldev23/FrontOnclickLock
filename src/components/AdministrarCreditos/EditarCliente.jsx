@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchCliente, patchCliente } from '../api/api';
+import { fetchCliente, patchCliente } from '../../api/api';
 import { toast } from 'react-toastify';
 import { Card, Input, Button, Typography, Spinner } from '@material-tailwind/react';  // Asegúrate de tener Spinner o utiliza otro componente de carga.
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/20/solid';

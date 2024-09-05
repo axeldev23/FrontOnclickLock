@@ -1,5 +1,5 @@
-const API_URL = 'https://gestionprestamos-server.onrender.com/api';
-//const API_URL = 'http://localhost:8000/api';
+//const API_URL = 'https://gestionprestamos-server.onrender.com/api';
+const API_URL = 'http://localhost:8000/api';
 
 
 // Clientes

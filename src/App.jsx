@@ -1,13 +1,13 @@
 import './assets/styles/App.css';
 import Login from './components/Login';
-import AdminstrarCreditos from './components/AdministrarCreditos';
-import MultiStepForm from './components/MultiStepForm';
+import AdminstrarCreditos from './components/AdministrarCreditos/AdministrarCreditos';
+import MultiStepForm from './components/CotizarCreditos/MultiStepForm';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './components/context/AuthContext';
 import { useContext } from 'react';
-import Layout from './components/Layout';
-import EditarCliente from './components/EditarCliente';
-
+import Layout from './components/Layout/Layout';
+import EditarCliente from './components/AdministrarCreditos/EditarCliente';
+import Pagos from './components/Pagos/Pagos';
 
 
 const PrivateRoute = ({ element }) => {
@@ -25,7 +25,7 @@ function App() {
         <Route path="/" element={<PrivateRoute element={<MultiStepForm />} />} />
         <Route path="/administrar-creditos" element={<PrivateRoute element={<AdminstrarCreditos />} />} />
         <Route path="/editar-cliente/:id" element={<EditarCliente />} />
-
+        <Route path="/pagos" element={<PrivateRoute element={<Pagos />} />} />
         </Route>
       </Routes>
     </AuthProvider>
