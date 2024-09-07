@@ -89,30 +89,37 @@ const AdministrarCreditos = () => {
 
   useEffect(() => {
     const filterPrestamos = () => {
-      const filtered = prestamos.filter((prestamo) => {
-        const cliente = clientes.find((cliente) => cliente.id === prestamo.cliente);
-        const clienteNombre = cliente ? cliente.nombre_completo.toLowerCase() : '';
-        const clienteTelefono = cliente ? cliente.numero_telefono.toLowerCase() : '';
-        const claveElector = cliente ? cliente.clave_elector.toLowerCase() : '';
-        const equipo = prestamo.equipo_a_adquirir.toLowerCase();
-        const term = searchTerm.toLowerCase();
-        const estadoMatch = prestamo.estado === estadoFilter;
+      const filtered = prestamos
+        .filter((prestamo) => {
+          const cliente = clientes.find((cliente) => cliente.id === prestamo.cliente);
+          const clienteNombre = cliente ? cliente.nombre_completo.toLowerCase() : '';
+          const clienteTelefono = cliente ? cliente.numero_telefono.toLowerCase() : '';
+          const claveElector = cliente ? cliente.clave_elector.toLowerCase() : '';
+          const equipo = prestamo.equipo_a_adquirir.toLowerCase();
+          const term = searchTerm.toLowerCase();
+          const estadoMatch = prestamo.estado === estadoFilter;
 
-        const isUserPrestamo = user.is_staff || prestamo.creado_por === user.id;
+          const isUserPrestamo = user.is_staff || prestamo.creado_por === user.id;
 
-        return (
-          isUserPrestamo &&
-          (clienteNombre.includes(term) ||
-            clienteTelefono.includes(term) ||
-            claveElector.includes(term) ||
-            equipo.includes(term)) &&
-          estadoMatch
-        );
-      });
+          return (
+            isUserPrestamo &&
+            (clienteNombre.includes(term) ||
+              clienteTelefono.includes(term) ||
+              claveElector.includes(term) ||
+              equipo.includes(term)) &&
+            estadoMatch
+          );
+        })
+        // Ordenar por ID, más alto primero
+        .sort((a, b) => b.id - a.id);
+
       setFilteredPrestamos(filtered);
     };
+
     filterPrestamos();
   }, [searchTerm, prestamos, clientes, estadoFilter, user]);
+
+
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);

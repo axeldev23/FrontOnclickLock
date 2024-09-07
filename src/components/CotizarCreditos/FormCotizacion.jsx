@@ -4,16 +4,23 @@ import { toast } from 'react-toastify';
 function FormCotizacion({ formData: initialData, handleNext }) {
     const [formData, setFormData] = useState(initialData);
     const [autoSelectDate, setAutoSelectDate] = useState(false);
+    const [userModifiedMonto, setUserModifiedMonto] = useState(false); // Detecta si el usuario modificó el monto
+    const [montoOriginal, setMontoOriginal] = useState(initialData.monto_credito); // Almacena el valor original del monto a financiar
 
+    // Actualiza el monto a financiar cuando se cambia el precio del equipo, y limpia el pago inicial
     useEffect(() => {
-        if (formData.equipo_precio && !formData.monto_credito) {
+        if (formData.equipo_precio && !userModifiedMonto) {
+            const equipoPrecio = parseFloat(formData.equipo_precio) || 0;
             setFormData(prevState => ({
                 ...prevState,
-                monto_credito: formData.equipo_precio
+                monto_credito: equipoPrecio,
+                pago_inicial: '' // Limpia el pago inicial cuando cambia el precio del equipo
             }));
+            setMontoOriginal(equipoPrecio); // Actualiza el monto original
         }
-    }, [formData.equipo_precio]);
+    }, [formData.equipo_precio, userModifiedMonto]);
 
+    // Calcula la fecha del primer pago automáticamente
     useEffect(() => {
         if (autoSelectDate) {
             const fetchNextPaymentDate = () => {
@@ -46,91 +53,103 @@ function FormCotizacion({ formData: initialData, handleNext }) {
         }
     }, [autoSelectDate]);
 
+    // Maneja los cambios de los campos del formulario
     const handleChange = (event) => {
         const { name, value } = event.target;
         let parsedValue = value;
         let errorMessage = '';
-
+    
         if (name === 'plazo_credito') {
-            if (!/^\d*$/.test(value)) {
-                errorMessage = "El plazo del crédito solo puede contener números enteros.";
-            }
-
-            parsedValue = parseInt(value, 10) || '';
-            if (parsedValue < 1) {
+            parsedValue = value === '' ? '' : parseInt(value, 10) || '';
+            if (parsedValue !== '' && parsedValue < 1) {
                 errorMessage = "El plazo del crédito debe ser al menos 1 semana.";
             }
-            if (parsedValue > 156) {
+            if (parsedValue !== '' && parsedValue > 156) {
                 errorMessage = "El plazo del crédito no puede exceder las 156 semanas.";
             }
         }
-
+    
         if (['equipo_precio', 'monto_credito', 'pago_inicial'].includes(name)) {
             if (!/^\d*\.?\d{0,2}$/.test(value)) {
                 errorMessage = "Este campo solo permite números enteros o con hasta dos decimales.";
             }
-
+    
             parsedValue = value;
             const floatParsedValue = parseFloat(parsedValue) || '';
-
+    
             if (floatParsedValue < 0) {
                 errorMessage = "El valor no puede ser negativo.";
             }
         }
-
+    
         if (name === 'interes') {
+            parsedValue = parseInt(value, 10) || '';
             if (!/^\d*$/.test(value) || value.length > 4) {
                 errorMessage = "El interés solo puede contener números enteros y un máximo de 4 dígitos.";
             }
-
-            parsedValue = parseInt(value, 10) || '';
         }
-
+    
         if (errorMessage) {
             toast.error(errorMessage);
-            return formData;
+            return;
         }
-
+    
         setFormData(prevState => {
             let newData = { ...prevState, [name]: parsedValue };
-
+    
             if (name === 'equipo_precio') {
-                newData.monto_credito = parseFloat(parsedValue) || '';
+                // Si el usuario no ha modificado manualmente el monto, actualiza monto_credito y limpia pago_inicial
+                if (!userModifiedMonto) {
+                    const equipoPrecio = parseFloat(parsedValue) || 0;
+                    newData.monto_credito = equipoPrecio;
+                    newData.pago_inicial = ''; // Limpia el pago inicial cuando se modifica el precio del equipo
+                    setMontoOriginal(equipoPrecio); // Actualiza el monto original
+                }
             }
-
-            if (name === 'monto_credito' && parseFloat(parsedValue) > newData.equipo_precio) {
-                toast.error("El monto a financiar no puede ser mayor al precio del equipo.");
-                newData.monto_credito = prevState.monto_credito;
-            }
-
-            if (name === 'pago_inicial' && newData.monto_credito) {
-                const montoRestante = newData.equipo_precio - parseFloat(parsedValue);
-                if (montoRestante < 0) {
-                    toast.error("El pago inicial no puede ser mayor al precio del equipo.");
-                    newData.pago_inicial = prevState.pago_inicial;
+    
+            if (name === 'pago_inicial') {
+                const pagoInicialNum = parseFloat(parsedValue) || 0;
+                if (parsedValue === '') {
+                    // Si el campo de pago inicial está vacío, restablecer el monto original
+                    newData.monto_credito = montoOriginal;
                 } else {
-                    newData.monto_credito = montoRestante;
+                    // Restar el pago inicial del monto original ingresado por el usuario
+                    newData.monto_credito = (montoOriginal - pagoInicialNum).toFixed(2);
                 }
             }
-
-            if (name === 'monto_credito' || name === 'pago_inicial') {
-                const sumaTotal = parseFloat(newData.pago_inicial) + parseFloat(newData.monto_credito);
-                if (sumaTotal > newData.equipo_precio) {
-                    toast.error("La suma del pago inicial y el monto a financiar no puede exceder el precio del equipo.");
-                    newData = prevState;
-                }
-            }
-
+    
             return newData;
         });
     };
 
+    // Maneja los cambios en el monto a financiar y limpia el pago inicial
+    const handleMontoCreditoChange = (event) => {
+        const { value } = event.target;
+        if (/^\d*\.?\d{0,2}$/.test(value)) {
+            setUserModifiedMonto(true); // Indica que el usuario ha modificado manualmente el monto
+            setFormData(prevState => ({
+                ...prevState,
+                monto_credito: parseFloat(value) || '',
+                pago_inicial: '' // Limpia el campo de pago inicial cuando se cambia el monto a financiar
+            }));
+            setMontoOriginal(parseFloat(value) || 0); // Almacena el valor original ingresado por el usuario
+        }
+    };
+
+    // Maneja la lógica al enviar el formulario
     const handleSubmit = (event) => {
         event.preventDefault();
 
         const precioEquipo = parseFloat(formData.equipo_precio);
         const montoCredito = parseFloat(formData.monto_credito);
         const pagoInicial = parseFloat(formData.pago_inicial);
+        const fechaPrimerPago = new Date(formData.fecha_primer_pago);
+        const hoy = new Date();
+
+        if (fechaPrimerPago < hoy.setHours(0, 0, 0, 0)) {
+            toast.error("La fecha del primer pago no puede ser anterior a hoy.");
+            return;
+        }
 
         if (precioEquipo > 100000) {
             toast.error("El precio del equipo no puede ser mayor a 100,000.");
@@ -216,7 +235,7 @@ function FormCotizacion({ formData: initialData, handleNext }) {
                                 name="monto_credito"
                                 id="monto_credito"
                                 value={formData.monto_credito || ''}
-                                onChange={handleChange}
+                                onChange={handleMontoCreditoChange} // Nuevo handler para manejar los cambios del monto manual
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 required
                                 disabled={!formData.equipo_precio}
@@ -279,7 +298,7 @@ function FormCotizacion({ formData: initialData, handleNext }) {
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 required
                                 disabled={autoSelectDate}
-                                min={today}
+                                min={today}  // Establece el mínimo como la fecha de hoy
                             />
                         </div>
                     </div>

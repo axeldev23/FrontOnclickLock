@@ -1,5 +1,5 @@
-const API_URL = 'https://gestionprestamos-server.onrender.com/api';
-//const API_URL = 'http://localhost:8000/api';
+//const API_URL = 'https://gestionprestamos-server.onrender.com/api';
+const API_URL = 'http://localhost:8000/api';
 
 
 // Clientes
@@ -269,13 +269,18 @@ export const generarPagare = async (data) => {
 
 
 // Generar Tabla de Amortización
+// Generar Tabla de Amortización
 export const generarAmortizacion = async (data) => {
   console.log('Iniciando generación de amortización...');
 
   // Mostrar los datos que se están enviando
   for (let pair of data.entries()) {
-    console.log(pair[0]+ ': ' + pair[1]);
+    console.log(`${pair[0]}: ${pair[1]}`);
   }
+
+  // Verificación adicional del campo 'fecha_inicio'
+  const fechaInicio = data.get('fecha_inicio');
+  console.log('Valor de fecha_inicio:', fechaInicio);
 
   try {
       const response = await fetch(`${API_URL}/generar-contrato/`, {
@@ -309,6 +314,7 @@ export const generarAmortizacion = async (data) => {
       throw error;
   }
 };
+
 
 // Obtener usuario por ID
 export const getUserById = async (id) => {
