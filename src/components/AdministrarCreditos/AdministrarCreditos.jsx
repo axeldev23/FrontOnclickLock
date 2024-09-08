@@ -14,12 +14,14 @@ import {
   Chip,
   Button,
   Tooltip,
+  Spinner,
 } from '@material-tailwind/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { fetchClientes, fetchPrestamos, updatePrestamo, downloadImage, getUserById } from '../../api/api';
 import GenerarAmortizacion from '../Formatos/GenerarAmortizacion';
 import GenerarPagare from '../Formatos/GenerarPagare';
 import { AuthContext } from '../context/AuthContext'; // Importa el contexto de autenticación
+
 
 const TABS = [
   {
@@ -44,6 +46,8 @@ const AdministrarCreditos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [usuarios, setUsuarios] = useState({}); // Estado para almacenar usuarios
+  const [isLoading, setIsLoading] = useState(false);// Estado para almacenar el estado de carga
+
 
   const { user } = useContext(AuthContext); // Usa el contexto de autenticación para obtener el usuario
 
@@ -57,14 +61,17 @@ const AdministrarCreditos = () => {
   }, []);
 
   useEffect(() => {
+
     const fetchData = async () => {
+      setIsLoading(true); // Activar el spinner al iniciar la carga
+
       try {
         const prestamosData = await fetchPrestamos();
         const clientesData = await fetchClientes();
-  
-        // Ordenar los préstamos por fecha de creación en orden descendente
+
+        // Ordenar los préstamos po-r fecha de creación en orden descendente
         const sortedPrestamos = prestamosData.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
-  
+
         setPrestamos(sortedPrestamos);
         setClientes(clientesData);
 
@@ -83,12 +90,15 @@ const AdministrarCreditos = () => {
       } catch (error) {
         console.error('Error fetching data:', error);
       }
+      setIsLoading(false); // Desactivar el spinner una vez cargados los datos
+
     };
     fetchData();
   }, []);
 
   useEffect(() => {
     const filterPrestamos = () => {
+
       const filtered = prestamos
         .filter((prestamo) => {
           const cliente = clientes.find((cliente) => cliente.id === prestamo.cliente);
@@ -190,15 +200,18 @@ const AdministrarCreditos = () => {
           </div>
         </div>
       </CardHeader>
-      <CardBody className="overflow-scroll px-0">
+      <CardBody className="relative overflow-scroll px-0">
+        {isLoading && (
+          <div className="absolute top-20 left-0 right-0 flex justify-center items-center z-10" style={{}}>
+            <Spinner className="h-20 w-6" />
+
+          </div>
+        )}
         <table className="mt-4 w-full min-w-max table-auto text-left">
           <thead>
             <tr>
               {TABLE_HEAD.map((head) => (
-                <th
-                  key={head}
-                  className="border-y border-blue-gray-100 bg-blue-gray-50/50 dark:bg-dark-border p-4 px-7"
-                >
+                <th key={head} className="border-y border-blue-gray-100 bg-blue-gray-50/50 dark:bg-dark-border p-4 px-7">
                   <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70 dark:text-white">
                     {head}
                   </Typography>
@@ -207,14 +220,16 @@ const AdministrarCreditos = () => {
             </tr>
           </thead>
           <tbody>
-            {currentPrestamos.length > 0 ? (
+            {isLoading && (
+              <tr className='h-12'>
+              </tr>
+            )}
+            {!isLoading && currentPrestamos.length > 0 ? (
               currentPrestamos.map((prestamo, index) => {
-                const cliente = clientes.find((cliente) => cliente.id === prestamo.cliente);
+                const cliente = clientes.find(cliente => cliente.id === prestamo.cliente);
                 const creadoPor = user.is_staff ? usuarios[prestamo.creado_por] : null;
-
                 const isLast = index === currentPrestamos.length - 1;
                 const classes = isLast ? 'p-4' : 'p-4 border-b border-blue-gray-50';
-
                 return (
                   <tr key={prestamo.id}>
                     {user.is_staff && (
@@ -244,11 +259,7 @@ const AdministrarCreditos = () => {
                           <Typography variant="small" color="blue-gray" className="font-normal dark:text-white">
                             {cliente ? cliente.nombre_completo : 'N/A'}
                           </Typography>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal opacity-70 dark:text-white"
-                          >
+                          <Typography variant="small" color="blue-gray" className="font-normal opacity-70 dark:text-white">
                             {cliente ? cliente.numero_telefono : 'N/A'}
                           </Typography>
                         </div>
@@ -325,15 +336,14 @@ const AdministrarCreditos = () => {
                             <option value="FINALIZADO">Finalizado</option>
                           </select>
                         </Tooltip>
-
                       </div>
                     </td>
                   </tr>
                 );
               })
-            ) : (
+            ) : !isLoading && (
               <tr>
-                <td colSpan={6} className="p-4 text-center">
+                <td colSpan={user.is_staff ? 7 : 6} className="p-4 text-center">
                   No se encontraron créditos
                 </td>
               </tr>
@@ -341,6 +351,7 @@ const AdministrarCreditos = () => {
           </tbody>
         </table>
       </CardBody>
+
       <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
         <Typography variant="small" color="blue-gray" className="font-normal dark:text-white">
           Página {currentPage} de {totalPages}
@@ -371,3 +382,7 @@ const AdministrarCreditos = () => {
 };
 
 export default AdministrarCreditos;
+
+
+
+

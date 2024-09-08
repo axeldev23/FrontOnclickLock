@@ -26,32 +26,36 @@ function FormCotizacion({ formData: initialData, handleNext }) {
             const fetchNextPaymentDate = () => {
                 try {
                     const currentDate = new Date();
-                    let nextThursdayOrSunday = new Date(currentDate);
                     const dayOfWeek = currentDate.getDay();
-
-                    if (dayOfWeek === 0) {
-                        nextThursdayOrSunday.setDate(currentDate.getDate() + 3);
-                    } else if (dayOfWeek === 4) {
-                        nextThursdayOrSunday.setDate(currentDate.getDate() + 2);
-                    } else {
-                        let daysToAdd = (dayOfWeek <= 4) ? (3 - dayOfWeek) : (6 - dayOfWeek);
-                        nextThursdayOrSunday.setDate(currentDate.getDate() + daysToAdd);
+                    let daysToAdd = 0;
+    
+                    // Lógica para calcular el próximo jueves o domingo
+                    if (dayOfWeek >= 0 && dayOfWeek < 4) {
+                        // Si hoy es de domingo (0) a miércoles (3), calcular días hasta el jueves (4)
+                        daysToAdd = 4 - dayOfWeek;
+                    } else if (dayOfWeek >= 4 && dayOfWeek <= 6) {
+                        // Si hoy es jueves (4) a sábado (6), calcular días hasta el domingo (0)
+                        daysToAdd = (7 - dayOfWeek) % 7;
                     }
-
-                    const formattedDate = nextThursdayOrSunday.toISOString().split('T')[0];
+    
+                    const nextDate = new Date(currentDate);
+                    nextDate.setDate(currentDate.getDate() + daysToAdd);
+    
+                    const formattedDate = nextDate.toISOString().split('T')[0];
                     setFormData(prevState => ({
                         ...prevState,
                         fecha_primer_pago: formattedDate
                     }));
                 } catch (error) {
-                    console.error('Error fetching date from browser', error);
-                    toast.error("Error al obtener la fecha actual. Por favor, intente nuevamente.");
+                    console.error('Error al calcular la fecha del próximo jueves o domingo', error);
+                    toast.error("Error al obtener la fecha. Por favor, intente nuevamente.");
                 }
             };
-
+    
             fetchNextPaymentDate();
         }
     }, [autoSelectDate]);
+    
 
     // Maneja los cambios de los campos del formulario
     const handleChange = (event) => {
