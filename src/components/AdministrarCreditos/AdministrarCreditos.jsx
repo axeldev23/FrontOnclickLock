@@ -21,6 +21,9 @@ import { fetchClientes, fetchPrestamos, updatePrestamo, downloadImage, getUserBy
 import GenerarAmortizacion from '../Formatos/GenerarAmortizacion';
 import GenerarPagare from '../Formatos/GenerarPagare';
 import { AuthContext } from '../context/AuthContext'; // Importa el contexto de autenticación
+import ConfirmationModal from './ConfirmationModal'; // Ajusta la ruta según tu estructura de archivos
+import { cambiarEstadoPrestamo } from '../../api/api';
+
 
 
 const TABS = [
@@ -47,6 +50,10 @@ const AdministrarCreditos = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [usuarios, setUsuarios] = useState({}); // Estado para almacenar usuarios
   const [isLoading, setIsLoading] = useState(false);// Estado para almacenar el estado de carga
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPrestamo, setSelectedPrestamo] = useState(null);
+  const [newEstado, setNewEstado] = useState('');
+
 
 
   const { user } = useContext(AuthContext); // Usa el contexto de autenticación para obtener el usuario
@@ -144,18 +151,30 @@ const AdministrarCreditos = () => {
     setCurrentPage(1); // Reset to the first page when changing the filter
   };
 
-  const handleEstadoChange = async (id, newEstado) => {
-    try {
-      const updatedPrestamo = await updatePrestamo(id, { estado: newEstado });
-      setPrestamos((prevPrestamos) =>
-        prevPrestamos.map((prestamo) =>
-          prestamo.id === id ? { ...prestamo, estado: newEstado } : prestamo
-        )
-      );
-    } catch (error) {
-      console.error('Error updating prestamo estado:', error);
-    }
+  const handleEstadoChange = (id, estado) => {
+    setSelectedPrestamo(id); // Establece el ID del préstamo seleccionado
+    setNewEstado(estado); // Establece el nuevo estado seleccionado
+    setModalOpen(true); // Abre el modal de confirmación
   };
+
+  const confirmEstadoChange = async () => {
+    if (selectedPrestamo && newEstado) {
+      try {
+        await cambiarEstadoPrestamo(selectedPrestamo, newEstado); // Llama a la función de la API
+        setPrestamos((prevPrestamos) =>
+          prevPrestamos.map((prestamo) =>
+            prestamo.id === selectedPrestamo ? { ...prestamo, estado: newEstado } : prestamo
+          )
+        );
+        console.log('Estado del préstamo actualizado correctamente.');
+      } catch (error) {
+        console.error('Error al cambiar el estado del préstamo:', error);
+      }
+    }
+    setModalOpen(false); // Cierra el modal
+  };
+
+
 
   // Pagination logic
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -204,8 +223,8 @@ const AdministrarCreditos = () => {
           </div>
         </div>
       </CardHeader>
-      <CardBody className="relative overflow-scroll px-0">
-        {isLoading && (
+      <CardBody className="relative overflow-auto px-0 ">
+      {isLoading && (
           <div className="absolute top-20 left-0 right-0 flex justify-center items-center z-10" style={{}}>
             <Spinner className="h-20 w-6" />
 
@@ -301,8 +320,8 @@ const AdministrarCreditos = () => {
                             onClick={() => navigate(`/editar-cliente/${cliente.id}`)}
                             className="flex items-center gap-3"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                             </svg>
 
                             Editar
@@ -340,6 +359,14 @@ const AdministrarCreditos = () => {
                             <option value="FINALIZADO">Finalizado</option>
                           </select>
                         </Tooltip>
+                        <ConfirmationModal
+                          open={modalOpen}
+                          onClose={() => setModalOpen(false)}
+                          onConfirm={confirmEstadoChange}
+                          actionType={newEstado === 'FINALIZADO' ? 'ACTIVO_TO_FINALIZADO' : 'FINALIZADO_TO_ACTIVO'}
+                        />
+
+
                       </div>
                     </td>
                   </tr>

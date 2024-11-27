@@ -40,6 +40,9 @@ function FormCotizacion({ formData: initialData, handleNext }) {
     
                     const nextDate = new Date(currentDate);
                     nextDate.setDate(currentDate.getDate() + daysToAdd);
+                    nextDate.setHours(0, 0, 0, 0); // Ajusta la hora para evitar desfase
+    
+                    console.log(nextDate);
     
                     const formattedDate = nextDate.toISOString().split('T')[0];
                     setFormData(prevState => ({
@@ -55,6 +58,7 @@ function FormCotizacion({ formData: initialData, handleNext }) {
             fetchNextPaymentDate();
         }
     }, [autoSelectDate]);
+    
     
 
     // Maneja los cambios de los campos del formulario

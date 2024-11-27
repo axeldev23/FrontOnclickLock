@@ -166,19 +166,18 @@ const Layout = ({ children }) => {
               onChange={() => handleTabChange(3, '/pagos')}
               className="hidden"
             />
-            <label
+
+       
+
+            {/* EN DESARROLLO  */}
+            <label 
               htmlFor="radio-3"
               className={`tab flex items-center z-10 justify-center h-8 w-40 text-sm font-medium rounded-full cursor-pointer transition-colors ${selectedTab === 3 ? 'text-white' : 'text-black'
                 }`}
             >
               Pagos
-            </label>
-
-
-
-
-
-         
+            </label> 
+            {/* EN DESARROLLO  */}
 
 
             <span

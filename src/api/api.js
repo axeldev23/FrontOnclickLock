@@ -1,20 +1,20 @@
-//const API_URL = 'https://gestionprestamos-server.onrender.com/api';
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://gestionprestamos-server.onrender.com/api';
+//const API_URL = 'http://localhost:8000/api';
 
 
 // Clientes
 
 export const fetchClientes = async () => {
-    try {
-      const response = await fetch(`${API_URL}/clientes/`);
-      const data = await response.json();
-      console.log('Respuesta de fetchClientes:', JSON.stringify(data));
-      return data;
-    } catch (error) {
-      console.error('Error en fetchClientes:', error);
-      throw error;
-    }
-  };
+  try {
+    const response = await fetch(`${API_URL}/clientes/`);
+    const data = await response.json();
+    console.log('Respuesta de fetchClientes:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en fetchClientes:', error);
+    throw error;
+  }
+};
 
 export const fetchCliente = async (id) => {
   const response = await fetch(`${API_URL}/clientes/${id}/`);
@@ -47,23 +47,23 @@ export const createCliente = async (cliente) => {
 
 export const patchCliente = async (id, data) => {
   const token = localStorage.getItem('token');
-  
+
   try {
     const response = await fetch(`${API_URL}/clientes/${id}/update/`, {
       method: 'PATCH',
       body: data
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Error en patchCliente:', errorData);
       throw new Error('Failed to update cliente');
     }
-    
+
     const responseData = await response.json();
     console.log('Respuesta de patchCliente:', JSON.stringify(responseData));
     return responseData;
-    
+
   } catch (error) {
     console.error('Error en patchCliente:', error);
     throw error;
@@ -143,35 +143,35 @@ export const createPrestamo = async (prestamo) => {
   }
 };
 
-  export const updatePrestamo = async (id, prestamoData) => {
-    console.log(`Intentando actualizar prestamo con ID: ${id}`);
-    console.log('Datos del prestamo a actualizar:', prestamoData);
-    
-    try {
-      const response = await fetch(`${API_URL}/prestamos/${id}/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(prestamoData)
-      });
-  
-      console.log('Respuesta de la actualización:', response);
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error en la actualización:', errorText);
-        throw new Error('Failed to update prestamo');
-      }
-  
-      const data = await response.json();
-      console.log('Datos actualizados del prestamo:', data);
-      return data;
-    } catch (error) {
-      console.error('Error en updatePrestamo:', error);
-      throw error;
+export const updatePrestamo = async (id, prestamoData) => {
+  console.log(`Intentando actualizar prestamo con ID: ${id}`);
+  console.log('Datos del prestamo a actualizar:', prestamoData);
+
+  try {
+    const response = await fetch(`${API_URL}/prestamos/${id}/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(prestamoData)
+    });
+
+    console.log('Respuesta de la actualización:', response);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error en la actualización:', errorText);
+      throw new Error('Failed to update prestamo');
     }
-  };
+
+    const data = await response.json();
+    console.log('Datos actualizados del prestamo:', data);
+    return data;
+  } catch (error) {
+    console.error('Error en updatePrestamo:', error);
+    throw error;
+  }
+};
 
 export const deletePrestamo = async (id) => {
   const response = await fetch(`${API_URL}/prestamos/${id}/`, {
@@ -241,29 +241,29 @@ export const downloadImage = async (clienteId) => {
 // Generar Pagaré
 export const generarPagare = async (data) => {
   try {
-      const response = await fetch(`${API_URL}/generar-pagare/`, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-      });
+    const response = await fetch(`${API_URL}/generar-pagare/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) {
-          throw new Error('Failed to generate pagare');
-      }
+    if (!response.ok) {
+      throw new Error('Failed to generate pagare');
+    }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `pagare_${data.id}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pagare_${data.id}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   } catch (error) {
-      console.error('Error en generarPagare:', error);
-      throw error;
+    console.error('Error en generarPagare:', error);
+    throw error;
   }
 };
 
@@ -283,35 +283,35 @@ export const generarAmortizacion = async (data) => {
   console.log('Valor de fecha_inicio:', fechaInicio);
 
   try {
-      const response = await fetch(`${API_URL}/generar-contrato/`, {
-          method: 'POST',
-          body: data, // Usamos FormData directamente
-      });
+    const response = await fetch(`${API_URL}/generar-contrato/`, {
+      method: 'POST',
+      body: data, // Usamos FormData directamente
+    });
 
-      console.log('Respuesta del servidor recibida:', response);
+    console.log('Respuesta del servidor recibida:', response);
 
-      if (!response.ok) {
-          console.error('Error en la respuesta del servidor:', response.status, response.statusText);
-          throw new Error('Failed to generate amortizacion');
-      }
+    if (!response.ok) {
+      console.error('Error en la respuesta del servidor:', response.status, response.statusText);
+      throw new Error('Failed to generate amortizacion');
+    }
 
-      const blob = await response.blob();
-      console.log('Blob creado:', blob);
+    const blob = await response.blob();
+    console.log('Blob creado:', blob);
 
-      const url = window.URL.createObjectURL(blob);
-      console.log('URL de Blob:', url);
+    const url = window.URL.createObjectURL(blob);
+    console.log('URL de Blob:', url);
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `amortizacion_${data.get('nombre_completo')}.docx`; // Accedemos al nombre desde FormData
-      document.body.appendChild(a);
-      a.click();
-      console.log('Descarga iniciada para:', a.download);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `amortizacion_${data.get('nombre_completo')}.docx`; // Accedemos al nombre desde FormData
+    document.body.appendChild(a);
+    a.click();
+    console.log('Descarga iniciada para:', a.download);
 
-      a.remove();
+    a.remove();
   } catch (error) {
-      console.error('Error en generarAmortizacion:', error);
-      throw error;
+    console.error('Error en generarAmortizacion:', error);
+    throw error;
   }
 };
 
@@ -375,6 +375,25 @@ export const registrarPago = async (pagoId) => {
   }
 };
 
+// Desregistrar un pago
+export const desregistrarPago = async (pagoId) => {
+  try {
+    const response = await fetch(`${API_URL}/pago/${pagoId}/desregistrar/`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to deregister pago');
+    }
+    const data = await response.json();
+    console.log('Respuesta de desregistrarPago:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en desregistrarPago:', error);
+    throw error;
+  }
+};
+
+
 // Obtener detalles de un pago específico
 export const fetchPagoDetails = async (pagoId) => {
   try {
@@ -387,6 +406,75 @@ export const fetchPagoDetails = async (pagoId) => {
     return data;
   } catch (error) {
     console.error('Error en fetchPagoDetails:', error);
+    throw error;
+  }
+};
+
+// Obtener detalles de un pago específico
+export const actualizarEstatusPagos = async (prestamoId) => {
+  try {
+    const response = await fetch(`${API_URL}/prestamos/${prestamoId}/actualizar-estatus/`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update status');
+    }
+    const data = await response.json();
+    console.log('Respuesta de actualizarEstatusPagos:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en actualizarEstatusPagos:', error);
+    throw error;
+  }
+};
+
+
+// Enviar SMS relacionado a un préstamo
+export const enviarSmsPrestamo = async ({ mensaje, cliente_id }) => {
+  try {
+    const response = await fetch(`${API_URL}/prestamos/enviar-sms`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ mensaje, cliente_id }), // Asegúrate de enviar mensaje y cliente_id
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send SMS for prestamo');
+    }
+
+    const data = await response.json();
+    console.log('Respuesta de enviarSmsPrestamo:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en enviarSmsPrestamo:', error);
+    throw error;
+  }
+};
+
+
+
+// Cambiar el estado de un préstamo y actualizar los pagos asociados
+export const cambiarEstadoPrestamo = async (prestamoId, nuevoEstado) => {
+  try {
+    const response = await fetch(`${API_URL}/prestamos/${prestamoId}/actualizar-estado/`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ estado: nuevoEstado }), // Envía el nuevo estado en el cuerpo de la solicitud
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update loan status');
+    }
+
+    const data = await response.json();
+    console.log('Respuesta de cambiarEstadoPrestamo:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en cambiarEstadoPrestamo:', error);
     throw error;
   }
 };

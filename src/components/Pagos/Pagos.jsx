@@ -19,14 +19,9 @@ import { fetchClientes, fetchPrestamos, fetchPagosByPrestamo } from '../../api/a
 import PagosModal from './PagosModal'; // Importa el componente modal
 
 const TABS = [
-    {
-        label: 'Activo',
-        value: 'ACTIVO',
-    },
-    {
-        label: 'Finalizado',
-        value: 'FINALIZADO',
-    },
+    { label: 'Pendiente', value: 'Atrasado' },
+    { label: 'Pagado', value: 'A Tiempo' },
+    { label: 'Todos', value: 'ALL' }
 ];
 
 const ITEMS_PER_PAGE = 10;
@@ -40,7 +35,7 @@ const Pagos = () => {
     const [isLoading, setIsLoading] = useState(false); // Carga de la tabla
     const [isModalLoading, setIsModalLoading] = useState(false); // Carga exclusiva para el modal
     const [isDarkMode, setIsDarkMode] = useState(false);
-    const [estadoFilter, setEstadoFilter] = useState('ACTIVO');
+    const [estadoFilter, setEstadoFilter] = useState('ALL');
     const [isModalOpen, setIsModalOpen] = useState(false);  // Controla la apertura del modal
     const [selectedPrestamo, setSelectedPrestamo] = useState(null);  // El préstamo seleccionado
     const [pagos, setPagos] = useState([]);  // Los pagos del préstamo seleccionado
@@ -86,7 +81,8 @@ const Pagos = () => {
                 const clienteNombre = cliente ? cliente.nombre_completo.toLowerCase() : '';
                 const clienteTelefono = cliente ? cliente.numero_telefono.toLowerCase() : '';
                 const equipo = prestamo.equipo_a_adquirir.toLowerCase();
-                const estadoMatch = prestamo.estado === estadoFilter;
+                const estadoMatch = (estadoFilter === 'ALL' || prestamo.estatus_pago === estadoFilter) && prestamo.estado === 'ACTIVO'; // Filtro agregado para estado ACTIVO
+
                 const term = searchTerm.toLowerCase();
 
                 return (
@@ -102,6 +98,7 @@ const Pagos = () => {
 
         filterPrestamos();
     }, [searchTerm, prestamos, clientes, estadoFilter]);
+
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -122,13 +119,26 @@ const Pagos = () => {
         }
     };
 
-    const handleCloseModal = () => {
+    const handleCloseModal = async () => {
         setIsModalOpen(false);
         setSelectedPrestamo(null);
         setPagos([]);
+
+        // Recargar los datos de la tabla
+        try {
+            setIsLoading(true); // Activar indicador de carga
+            const prestamosData = await fetchPrestamos();
+            setPrestamos(prestamosData);
+        } catch (error) {
+            console.error('Error al recargar los datos de la tabla:', error);
+        } finally {
+            setIsLoading(false); // Desactivar indicador de carga
+        }
     };
 
-    const TABLE_HEAD = ['Cliente', 'Equipo', 'Estado', 'Monto', 'Acciones'];
+
+    const TABLE_HEAD = ['Cliente', 'Equipo', 'Estatus de Pago', 'Monto', 'Acciones'];
+
 
     // Pagination logic
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -145,7 +155,7 @@ const Pagos = () => {
                             Administrar Pagos
                         </Typography>
                         <Typography color="gray" className="mt-1 font-normal pl-5 dark:text-slider-color">
-                            Aquí puedes administrar los pagos de los clientes.
+                            Se muestran todos los créditos activos.
                         </Typography>
                     </div>
                 </div>
@@ -175,13 +185,13 @@ const Pagos = () => {
                     </div>
                 </div>
             </CardHeader>
-            <CardBody className="relative overflow-scroll px-0">
-                {isLoading && (
-                    <div className="absolute top-20 left-0 right-0 bottom-0 flex justify-center items-center z-10">
-                        <Spinner color="blueGray" size="lg" />
+            <CardBody className="relative overflow-auto px-0 ">
+            {isLoading && (
+                    <div className="absolute inset-0  top-20  flex justify-center items-center z-10" >
+                        <Spinner className="h-20 w-6" />
                     </div>
                 )}
-                <table className="mt-4 w-full min-w-max table-auto text-left">
+                <table className="mt-4 w-full min-w-max table-auto text-left ">
                     <thead>
                         <tr>
                             {TABLE_HEAD.map((head) => (
@@ -194,6 +204,10 @@ const Pagos = () => {
                         </tr>
                     </thead>
                     <tbody>
+                        {isLoading && (
+                            <tr className='h-12'>
+                            </tr>
+                        )}
                         {!isLoading && currentPrestamos.length > 0 ? currentPrestamos.map((prestamo) => {
                             const cliente = clientes.find((c) => c.id === prestamo.cliente);
                             return (
@@ -219,15 +233,20 @@ const Pagos = () => {
                                         {prestamo.equipo_a_adquirir}
                                     </td>
                                     <td className="p-4 border-b border-blue-gray-50 font-normal dark:text-white">
-                                        <div className='w-max'>
+                                        <div className="w-max">
                                             <Chip
                                                 variant={isDarkMode ? 'outlined' : 'ghost'}
                                                 size="sm"
-                                                value={prestamo.estado}
-                                                color={prestamo.estado === 'ACTIVO' ? 'green' : 'blue-gray'}
+                                                value={prestamo.estatus_pago}
+                                                color={
+                                                    prestamo.estatus_pago === 'Atrasado' ? 'yellow' :
+                                                        prestamo.estatus_pago === 'A Tiempo' ? 'green' :
+                                                            'blue-gray'
+                                                }
                                             />
                                         </div>
                                     </td>
+
                                     <td className="p-4 border-b border-blue-gray-50 font-normal dark:text-white">
                                         ${prestamo.monto_credito}
                                     </td>
@@ -280,6 +299,7 @@ const Pagos = () => {
                 handleClose={handleCloseModal}
                 prestamo={selectedPrestamo}
                 pagos={pagos}
+                setPagos={setPagos}
                 isDarkMode={isDarkMode}
                 cliente={clientes.find((c) => c.id === selectedPrestamo?.cliente)}
             />
