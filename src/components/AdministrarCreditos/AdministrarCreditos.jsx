@@ -60,6 +60,8 @@ const AdministrarCreditos = () => {
     return () => darkModeMediaQuery.removeEventListener('change', handler);
   }, []);
 
+
+  // Fetch data
   useEffect(() => {
 
     const fetchData = async () => {
@@ -96,6 +98,8 @@ const AdministrarCreditos = () => {
     fetchData();
   }, []);
 
+
+  // Filter data
   useEffect(() => {
     const filterPrestamos = () => {
 

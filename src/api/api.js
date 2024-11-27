@@ -1,5 +1,5 @@
-const API_URL = 'https://gestionprestamos-server.onrender.com/api';
-//const API_URL = 'http://localhost:8000/api';
+//const API_URL = 'https://gestionprestamos-server.onrender.com/api';
+const API_URL = 'http://localhost:8000/api';
 
 
 // Clientes
@@ -336,6 +336,57 @@ export const getUserById = async (id) => {
     return data;
   } catch (error) {
     console.error('Error en getUserById:', error);
+    throw error;
+  }
+};
+
+
+// Obtener los pagos de un préstamo específico
+export const fetchPagosByPrestamo = async (prestamoId) => {
+  try {
+    const response = await fetch(`${API_URL}/prestamo/${prestamoId}/pagos/`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch pagos');
+    }
+    const data = await response.json();
+    console.log('Respuesta de fetchPagosByPrestamo:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en fetchPagosByPrestamo:', error);
+    throw error;
+  }
+};
+
+// Registrar un pago como pagado
+export const registrarPago = async (pagoId) => {
+  try {
+    const response = await fetch(`${API_URL}/pago/${pagoId}/registrar/`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to register pago');
+    }
+    const data = await response.json();
+    console.log('Respuesta de registrarPago:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en registrarPago:', error);
+    throw error;
+  }
+};
+
+// Obtener detalles de un pago específico
+export const fetchPagoDetails = async (pagoId) => {
+  try {
+    const response = await fetch(`${API_URL}/pago/${pagoId}/`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch pago details');
+    }
+    const data = await response.json();
+    console.log('Respuesta de fetchPagoDetails:', JSON.stringify(data));
+    return data;
+  } catch (error) {
+    console.error('Error en fetchPagoDetails:', error);
     throw error;
   }
 };

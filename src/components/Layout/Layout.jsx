@@ -158,6 +158,24 @@ const Layout = ({ children }) => {
             >
               Administrar Créditos
             </label>
+            <input
+              type="radio"
+              id="radio-3"
+              name="tabs"
+              checked={selectedTab === 3}
+              onChange={() => handleTabChange(3, '/pagos')}
+              className="hidden"
+            />
+            <label
+              htmlFor="radio-3"
+              className={`tab flex items-center z-10 justify-center h-8 w-40 text-sm font-medium rounded-full cursor-pointer transition-colors ${selectedTab === 3 ? 'text-white' : 'text-black'
+                }`}
+            >
+              Pagos
+            </label>
+
+
+
 
 
          

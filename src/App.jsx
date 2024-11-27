@@ -22,10 +22,10 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route element={<Layout />}>
-        <Route path="/" element={<PrivateRoute element={<MultiStepForm />} />} />
-        <Route path="/administrar-creditos" element={<PrivateRoute element={<AdminstrarCreditos />} />} />
-        <Route path="/editar-cliente/:id" element={<EditarCliente />} />
-        <Route path="/pagos" element={<PrivateRoute element={<Pagos />} />} />
+          <Route path="/" element={<PrivateRoute element={<MultiStepForm />} />} />
+          <Route path="/administrar-creditos" element={<PrivateRoute element={<AdminstrarCreditos />} />} />
+          <Route path="/editar-cliente/:id" element={<EditarCliente />} />
+          <Route path="/pagos" element={<PrivateRoute element={<Pagos />} />} />
         </Route>
       </Routes>
     </AuthProvider>
