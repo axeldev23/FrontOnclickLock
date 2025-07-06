@@ -22,20 +22,32 @@ export const fetchCliente = async (id) => {
 export const createCliente = async (cliente) => {
   try {
     const formData = new FormData();
+
     for (const key in cliente) {
-      formData.append(key, cliente[key]);
+      if (key === "foto_identificacion") {
+        // Solo agregar si es un archivo válido
+        if (cliente[key] instanceof File) {
+          formData.append(key, cliente[key]);
+        }
+      } else {
+        formData.append(key, cliente[key]);
+      }
     }
+
     const response = await fetch(`${API_URL}/clientes`, {
       method: 'POST',
       body: formData
     });
+
     const data = await response.json();
     return { data, status: response.status };
+
   } catch (error) {
     console.error('Error en createCliente:', error);
     throw error;
   }
 };
+
 
 export const patchCliente = async (id, data) => {
   try {
