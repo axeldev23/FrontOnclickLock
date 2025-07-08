@@ -8,7 +8,7 @@ import { useContext } from 'react';
 import Layout from './components/Layout/Layout';
 import EditarCliente from './components/AdministrarCreditos/EditarCliente';
 import Pagos from './components/Pagos/Pagos';
-import ClientesAdmin from './components/Admin/ClientesAdmin';
+import ClientesAdmin from './components/AdministrarCreditos/ClientesAdmin';
 
 
 
