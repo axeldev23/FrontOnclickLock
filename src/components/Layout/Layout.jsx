@@ -11,6 +11,8 @@ const Layout = ({ children }) => {
   const [selectedTab, setSelectedTab] = useState(1);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const popupRef = useRef(null);
+  const { user } = useContext(AuthContext);
+
 
   // Update selected tab based on current location
   useEffect(() => {
@@ -180,10 +182,31 @@ const Layout = ({ children }) => {
             {/* EN DESARROLLO  */}
 
 
-            <span
-              className="glider absolute h-8 w-40 bg-slider-color-button rounded-full transition-transform "
-              style={{ transform: `translateX(${(selectedTab - 1.0) * 100}%)` }}
-            />
+            {user?.is_staff && (
+  <>
+    <input
+      type="radio"
+      id="radio-4"
+      name="tabs"
+      checked={selectedTab === 4}
+      onChange={() => handleTabChange(4, '/admin/clientes')}
+      className="hidden"
+    />
+    <label
+      htmlFor="radio-4"
+      className={`tab flex items-center z-10 justify-center h-8 w-40 text-sm font-medium rounded-full cursor-pointer transition-colors ${selectedTab === 4 ? 'text-white' : 'text-black'
+        }`}
+    >
+      Clientes (Admin)
+    </label>
+  </>
+)}
+
+<span
+  className="glider absolute h-8 w-40 bg-slider-color-button rounded-full transition-transform "
+  style={{ transform: `translateX(${(selectedTab - 1.0) * 100}%)` }}
+/>
+
           </div>
         </div>
       </div>
