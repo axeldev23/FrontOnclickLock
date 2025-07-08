@@ -23,9 +23,12 @@ const Layout = ({ children }) => {
     }
     else if (location.pathname === '/pagos') {
       setSelectedTab(3);
+    } else if (location.pathname === '/admin/clientes') {
+      setSelectedTab(4);
     } else {
-      setSelectedTab(1);s
-    }
+      setSelectedTab(1);
+    }    
+    
   }, [location.pathname]);
   const handleTabChange = (tabIndex, path) => {
     setSelectedTab(tabIndex);
