@@ -8,6 +8,8 @@ import { useContext } from 'react';
 import Layout from './components/Layout/Layout';
 import EditarCliente from './components/AdministrarCreditos/EditarCliente';
 import Pagos from './components/Pagos/Pagos';
+import ClientesAdmin from './components/Admin/ClientesAdmin';
+
 
 
 const PrivateRoute = ({ element }) => {
@@ -26,6 +28,8 @@ function App() {
           <Route path="/administrar-creditos" element={<PrivateRoute element={<AdminstrarCreditos />} />} />
           <Route path="/editar-cliente/:id" element={<EditarCliente />} />
           <Route path="/pagos" element={<PrivateRoute element={<Pagos />} />} />
+          <Route path="/admin/clientes" element={<PrivateRoute element={<ClientesAdmin />} />} />
+
         </Route>
       </Routes>
     </AuthProvider>
